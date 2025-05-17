@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 68, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/carlos.dias/Documents/Apps/mui_CHECKLIST/src/prisma.ts"],"sourcesContent":["import { PrismaClient } from '@prisma/client';\r\n\r\nconst globalForPrisma = global as unknown as { prisma: PrismaClient };\r\n\r\nexport const prisma = globalForPrisma.prisma || new PrismaClient();\r\nexport default prisma;\r\nif (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;\r\n"],"names":[],"mappings":";;;;AAAA;;AAEA,MAAM,kBAAkB;AAEjB,MAAM,SAAS,gBAAgB,MAAM,IAAI,IAAI,6HAAA,CAAA,eAAY;uCACjD;AACf,wCAA2C,gBAAgB,MAAM,GAAG","debugId":null}},
+    {"offset": {"line": 84, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/carlos.dias/Documents/Apps/mui_CHECKLIST/src/app/api/v1/vehicles/route.tsx"],"sourcesContent":["import { NextRequest, NextResponse } from 'next/server';\r\nimport { prisma } from '@/prisma';\r\n\r\nexport async function GET(request: NextRequest) {\r\n  try {\r\n    const vehicle = await prisma.vehicle.findMany();\r\n    return NextResponse.json(vehicle);\r\n  } catch (error) {\r\n    console.error('Error fetching:', error);\r\n    return NextResponse.json({ error: 'Failed to fetch' },{ status: 500 });\r\n  }\r\n}"],"names":[],"mappings":";;;AAAA;AACA;;;AAEO,eAAe,IAAI,OAAoB;IAC5C,IAAI;QACF,MAAM,UAAU,MAAM,+GAAA,CAAA,SAAM,CAAC,OAAO,CAAC,QAAQ;QAC7C,OAAO,gIAAA,CAAA,eAAY,CAAC,IAAI,CAAC;IAC3B,EAAE,OAAO,OAAO;QACd,QAAQ,KAAK,CAAC,mBAAmB;QACjC,OAAO,gIAAA,CAAA,eAAY,CAAC,IAAI,CAAC;YAAE,OAAO;QAAkB,GAAE;YAAE,QAAQ;QAAI;IACtE;AACF","debugId":null}}]
+}

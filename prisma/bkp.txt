@@ -1,0 +1,90 @@
+
+/*
+model VehicleKey {
+  id            String       @id @default(cuid())
+  userId        String
+  vehicleId     String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime?
+  parentId      String?      // Opcional, para permitir chaves sem pai
+
+  // Relações
+  user          user      @relation(fields: [userId], references: [id], onUpdate: Cascade, map: "vehicleKey_userId_fkey")
+  vehicle       vehicle   @relation(fields: [vehicleId], references: [id], onUpdate: Cascade, map: "vehicleKey_vehicleId_fkey")
+  
+  // Relação recursiva (self-relation)
+  parent        VehicleKey?  @relation("VehicleKeyHierarchy", fields: [parentId], references: [id], onUpdate: Cascade)
+  children      VehicleKey[] @relation("VehicleKeyHierarchy")
+
+  @@index([userId])
+  @@index([vehicleId])
+  @@index([parentId])
+
+  @@index([userId], map: "vehicleKey_userId_fkey")
+  @@index([vehicleId], map: "vehicleKey_vehicleId_fkey")
+}*/
+
+
+/**
+
+model VehicleKey {
+  id            String       @id @default(cuid())
+  userId        String
+  vehicleId     String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  parentId      String?
+
+  // Relações
+  user          user         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle       vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  
+  // Self-relation com restrições
+  parent        VehicleKey?  @relation("VehicleKeyHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children      VehicleKey[] @relation("VehicleKeyHierarchy")
+
+  @@index([userId])
+  @@index([vehicleId])
+  @@index([parentId])
+  @@index([createdAt])
+}
+
+*/
+
+
+
+recente 28-01-25
+
+model VehicleKey {
+  id            String       @id @default(cuid())
+  userId        String
+  lastUser      String?
+  vehicleId     String
+
+  isAccept      Boolean      @default(false)
+  dataAccept    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  parentId      String?
+
+  // Relações
+  user          user         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  vehicle       vehicle      @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([lastUser])
+  @@index([vehicleId])
+  @@index([parentId])
+  @@index([createdAt])
+}
+
+
+model Inspect {
+  id        String   @id @default(cuid())
+  start     Json?    // For status INICIO
+  end       Json?    // For status FINAL
+  userId    String
+  user      user     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

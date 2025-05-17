@@ -1,0 +1,93 @@
+name: Next.js CI/CD Pipeline
+
+on:
+  # Trigger the workflow on push and pull request events
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+  # Allow manual trigger of the workflow
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  # Build and test job
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    # Setup Node.js environment
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+    
+    # Install dependencies
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+    
+    # Run linting
+    - name: Run Linter
+      run: yarn lint
+    
+    # Run tests
+    - name: Run Tests
+      run: yarn test
+    
+    # Build the Next.js application
+    - name: Build Next.js App
+      run: yarn build
+    
+    # Upload build artifacts
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: nextjs-build
+        path: .next
+        retention-days: 7
+
+  # Optional deployment job (uncomment and configure as needed)
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    # Only deploy on main branch
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    # Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    # Download previously uploaded build artifacts
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: nextjs-build
+        path: .next
+    
+    # Deploy to GitHub Pages (optional)
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./out
+        # publish_branch: gh-pages  # Uncomment if deploying to GitHub Pages
+
+    # Alternative deployment example (to Vercel)
+    # - name: Deploy to Vercel
+    #   uses: amondnet/vercel-action@v20
+    #   with:
+    #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
+    #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+    #     vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}

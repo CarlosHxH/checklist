@@ -1,0 +1,241 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id             String       @id @default(cuid())
+  username       String       @unique(map: "User_username_key")
+  email          String?      @unique(map: "User_email_key")
+  email_verified DateTime?
+  password       String
+  name           String
+  role           String       @default("DRIVER")
+  image          String?
+  isActive       Boolean?     @default(true)
+  lastLogin      DateTime?
+  loginCount     Int?         @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime?
+  access         access[]
+  accounts       Account[]
+  inspection     inspection[]
+  sessions       Session[]
+  vehiclekey     VehicleKey[]
+  corrections    correction[]
+  
+  Inspect Inspect[] @relation(map: "Access_userId_fkey")
+  logs  Log[]
+}
+
+model Log {
+  id        Int      @id @default(autoincrement())
+  level     logType  @default(INFO)   // Nível do log (ex: INFO, WARN, ERROR)
+  message   String                    // Mensagem do log
+  timestamp DateTime @default(now())  // Data e hora do log
+  context   String?                   // Contexto adicional (opcional)
+  userId    String?                      // ID do usuário associado (opcional)
+  user      user?    @relation(fields: [userId], references: [id])
+}
+enum logType {
+    INFO
+    WARN
+    ERROR
+}
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              user    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  //@@unique([provider, providerAccountId, access_token])
+  //@@index([userId], map: "accounts_user_id_fkey")
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "sessions_user_id_fkey")
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model access {
+  id        String   @id @default(cuid())
+  userId    String
+  page      String
+  ipAddress String
+  userAgent String
+  timestamp DateTime @default(now())
+  user      user     @relation(fields: [userId], references: [id], map: "Access_userId_fkey")
+
+  @@index([userId], map: "Access_userId_fkey")
+}
+
+
+model InspectionPhoto {
+  id            String     @id @default(cuid())
+  inspectionId  String
+  description   String?
+  photo         String     @db.LongText
+  createdAt     DateTime   @default(now())
+  type          String?    // To identify the type of photo (documento, tacografo, extintor, avarias)
+  
+  inspection    inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  
+  // Relations for specific photo types
+  documentoInspections inspection[] @relation("fotoDocumento")
+  tacografoInspections inspection[] @relation("fotoTacografo")
+  extintorInspections  inspection[] @relation("fotoExtintor")
+  veiculoInspections   inspection[] @relation("fotoVeiculo")
+
+  @@index([inspectionId])
+}
+model Inspect {
+  id            String  @id @default(cuid())
+  userId        String
+  startId       String?
+  endId         String?
+  vehicleId     String?
+
+  // These relations need opposite relations in the inspection model
+  start         inspection?  @relation("StartInspection", fields: [startId], references: [id])
+  end           inspection?  @relation("EndInspection", fields: [endId], references: [id])
+
+  vehicle       vehicle? @relation("EndInspection", fields: [vehicleId], references: [id])
+  user          user     @relation(fields: [userId], references: [id], map: "Inspect_userId_fkey")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum status {
+  INSPECAO
+  INICIO
+  FINAL
+}
+model inspection {
+  id                          String            @id @default(cuid())
+  userId                      String
+  vehicleId                   String
+  vehicleKey                  String?
+  dataInspecao                DateTime?         @default(now())
+  status                      status?
+  crlvEmDia                   String?
+  certificadoTacografoEmDia   String?
+  nivelAgua                   String?
+  nivelOleo                   String?
+  eixo                        String?
+  dianteira                   String?
+  descricaoDianteira          String?           @db.LongText
+  tracao                      String?
+  descricaoTracao             String?           @db.LongText
+  truck                       String?
+  descricaoTruck              String?           @db.LongText
+  quartoEixo                  String?
+  descricaoQuartoEixo         String?           @db.LongText
+  avariasCabine               String?
+  descricaoAvariasCabine      String?           @db.LongText
+  bauPossuiAvarias            String?
+  descricaoAvariasBau         String?           @db.LongText
+  funcionamentoParteEletrica  String?
+  descricaoParteEletrica      String?           @db.LongText
+
+  createdAt                   DateTime          @default(now())
+  updatedAt                   DateTime?         @default(now())
+  kilometer                   String?
+  isFinished                  Boolean?          @default(false)
+  
+  extintor                    String?
+
+  // Relations
+  user                        user              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle                     vehicle           @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  corrections                 correction[]
+  // Photo relations
+  photos                      InspectionPhoto[]
+  fotoDocumento               InspectionPhoto[] @relation("fotoDocumento")
+  fotoTacografo               InspectionPhoto[] @relation("fotoTacografo")
+  fotoExtintor                InspectionPhoto[] @relation("fotoExtintor")
+  fotoVeiculo                 InspectionPhoto[] @relation("fotoVeiculo")
+
+  inspectionsAsStart          Inspect[]         @relation("StartInspection")
+  inspectionsAsEnd            Inspect[]         @relation("EndInspection")
+
+  @@index([userId])
+  @@index([vehicleId])
+}
+
+model vehicle {
+  id              String       @id @default(cuid())
+  make            String?
+  model           String?
+  year            String?
+  eixo            String?
+  plate           String       @unique(map: "Vehicle_plate_key")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime?
+  fixo            Boolean      @default(false)
+  cidadeBase      String?
+  tacografo       Boolean      @default(false)
+  inspection      inspection[]
+  vehiclekey      VehicleKey[]
+  endInspection   Inspect[]    @relation("EndInspection")
+}
+
+model VehicleKey {
+  id              String       @id @default(uuid())
+  userId          String
+  vehicleId       String
+  parentId        String?
+  status          String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  user            user         @relation(fields: [userId], references: [id])
+  vehicle         vehicle      @relation(fields: [vehicleId], references: [id])
+  parent          VehicleKey?  @relation("KeyHistory", fields: [parentId], references: [id])
+  children        VehicleKey[] @relation("KeyHistory")
+}
+
+
+model correction {
+  id            String   @id @default(uuid())
+  inspectionId  String
+  section       String
+  resolvidoPor  String
+  observacoes   String? @db.LongText
+  userId        String
+  createdAt     DateTime @default(now())
+
+  inspection    inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  user          user       @relation(fields: [userId], references: [id])
+
+  @@index([inspectionId])
+  @@index([userId])
+}
