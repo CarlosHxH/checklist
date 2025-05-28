@@ -6,7 +6,6 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
 import StatCard, { StatCardProps } from "@/components/Dashboard/chats/StatCard";
-import PageViewsBarChart from "@/components/Dashboard/chats/PageViewsBarChart";
 import CustomTreeView from "@/components/Dashboard/chats/CustomTreeView";
 import ChartByVehicle from "@/components/Dashboard/chats/ChartByVehicle";
 import Loading from "@/components/Loading";
@@ -15,6 +14,8 @@ import { fetcher } from "@/lib/ultils";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@mui/material";
 import InspectionsDashboard from "@/components/Dashboard/chats/InspectionsDadhboard";
+import InspectionBarChart from "@/components/Dashboard/chats/CustomBarChart";
+import ChartByUsers from "@/components/Dashboard/chats/byUsers";
 
 export default function DashboardContent() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function DashboardContent() {
 
             <Grid container spacing={2} columns={12} sx={{ mb: (theme) => theme.spacing(2) }}>
               {data && data.map((card: StatCardProps, index: number) => (
-                <Grid key={index} size={{ xs: 12, sm: 3, lg: 3 }} onClick={() => redirect(card.title)} sx={{ cursor: "pointer" }}>
+                <Grid key={index} size={{ xs: 6, sm: 3, lg: 3 }} onClick={() => redirect(card.title)} sx={{ cursor: "pointer" }}>
                   <StatCard {...card} />
                 </Grid>
               ))}
@@ -68,10 +69,19 @@ export default function DashboardContent() {
                 </Box>
               </Grid>
 
-              <Grid size={{ xs: 12, md: 12 }}><PageViewsBarChart /></Grid>
+              <Grid size={{ xs: 12, md: 12 }}>
+                <InspectionBarChart 
+                  title="Visão Geral - Últimos 12 Meses"
+                  height={440}
+                  showAverage={true}
+                  period="12months"
+                />
+              </Grid>
 
               {false && <Grid size={{ xs: 12, sm: 6, lg: 6 }}><ChartByVehicle /></Grid>}
             </Grid>
+            
+            <Grid size={{ xs: 12, sm: 6, lg: 6 }}><ChartByUsers /></Grid>
 
             {false && (
               <>

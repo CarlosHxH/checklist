@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 
+
 // Using Next-Auth v5's middleware pattern
 export default auth(async (req) => {
   // The auth function adds the auth object to the request
@@ -14,15 +15,26 @@ export default auth(async (req) => {
   }
 
   // Handle API route permissions
-  if (nextUrl.pathname.startsWith("/api/v2/dashboard")) {
+  if (nextUrl.pathname.startsWith("/api/v1/")) {
     // Check if user has required role for dashboard API
-    if (!session?.user || !["ADMIN", "USER"].includes(session?.user?.role||"DRIVER")) {
+    if (!session?.user || !["ADMIN", "USER","DRIVER"].includes(session?.user?.role||"DRIVER")) {
       return NextResponse.json(
         { message: "Unauthorized access" },
         { status: 403 }
       );
     }
   }
+
+    // Handle API route permissions
+    if (nextUrl.pathname.startsWith("/api/v2/")) {
+      // Check if user has required role for dashboard API
+      if (!session?.user || !["ADMIN", "USER"].includes(session?.user?.role||"DRIVER")) {
+        return NextResponse.json(
+          { message: "Unauthorized access" },
+          { status: 403 }
+        );
+      }
+    }
 
   // Let auth API routes pass through
   if (nextUrl.pathname.startsWith("/api/auth")) {
@@ -47,16 +59,18 @@ export const config = {
   matcher: [
     // Auth routes
     "/auth/:path*",
-
     // Protected routes
     "/",
     "/dashboard/:path*",
     "/inspection/:path*",
     "/viagem/:path*",
     "/api/v1/:path*",
+    "/api/v2/:path*",
     // Add other routes as needed
   ],
 };
+
+
 
 /*
   // If user IS logged in and tries to access auth pages (prevent logged-in users from seeing login page)

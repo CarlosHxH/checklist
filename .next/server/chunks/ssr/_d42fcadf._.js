@@ -178,9 +178,22 @@ function SignIn() {
         providers: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$auth$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["providerMap"],
         localeText: {
             signInTitle: 'Bem vindo',
-            signInSubtitle: 'Informe seu Login e Senha para continuar'
+            signInSubtitle: 'Informe seu Login e Senha para continuar',
+            with: 'Entrar',
+            to: 'Entrar com'
         },
         slotProps: {
+            submitButton: {
+                variant: 'outlined',
+                color: 'primary',
+                title: 'Entrar',
+                size: 'large',
+                disableElevation: true,
+                fullWidth: true,
+                sx: {
+                    mt: 2
+                }
+            },
             emailField: {
                 type: 'text',
                 label: 'Usuário',
@@ -197,15 +210,12 @@ function SignIn() {
                 sx: {
                     display: 'none'
                 }
-            },
-            submitButton: {
-                title: "Entrar"
             }
         },
         signIn: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$auth$2f$signin$2f$action$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"]
     }, void 0, false, {
         fileName: "[project]/src/app/auth/signin/page.tsx",
-        lineNumber: 9,
+        lineNumber: 8,
         columnNumber: 5
     }, this);
 }

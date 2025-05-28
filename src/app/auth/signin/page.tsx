@@ -1,8 +1,8 @@
+'use client';
 import * as React from 'react';
 import { SignInPage } from '@toolpad/core/SignInPage';
 import { providerMap } from '@/auth';
 import authenticate from './action';
-
 
 export default function SignIn() {
   return (
@@ -12,8 +12,18 @@ export default function SignIn() {
       localeText={{
         signInTitle: 'Bem vindo',
         signInSubtitle: 'Informe seu Login e Senha para continuar',
+        providerSignInTitle: (provider: string) => 'Entrar',
       }}
       slotProps={{
+        submitButton: {
+          variant: 'contained',
+          color: 'primary',
+          title: 'Entrar',
+          size: 'large',
+          disableElevation: true,
+          fullWidth: true,
+          sx: { mt: 2 }
+        },
         emailField: {
           type: 'text',
           label: 'Usuário',
@@ -26,9 +36,6 @@ export default function SignIn() {
         },
         rememberMe: {
           sx: { display: 'none' }
-        },
-        submitButton: {
-          title: "Entrar"
         }
       }}
       signIn={authenticate as any}

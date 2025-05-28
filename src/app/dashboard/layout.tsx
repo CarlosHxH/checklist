@@ -26,6 +26,7 @@ const NAVIGATION: Navigation = [
     segment: 'dashboard/keys',
     title: 'Chaves',
     icon: <KeyOutlined />,
+    pattern: 'dashboard/keys{/:keyId}*',
   },
   {
     kind: 'divider',
@@ -55,14 +56,14 @@ const NAVIGATION: Navigation = [
     segment: 'dashboard/users',
     title: 'Usúarios',
     icon: <LayersIcon />,
-  },
+  }
+];
+/*
   {
     segment: '',
     title: 'Checklist',
     icon: <LayersIcon />,
-  },
-];
-
+  },*/
 
 const BRANDING = {
   title: '5S TRANSPORTES',

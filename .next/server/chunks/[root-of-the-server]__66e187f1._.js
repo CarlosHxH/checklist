@@ -164,6 +164,7 @@ async function GenerateAPIToken(user) {
 var { g: global, __dirname } = __turbopack_context__;
 {
 __turbopack_context__.s({
+    "GET": (()=>GET),
     "POST": (()=>POST)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/server.js [app-route] (ecmascript)");
@@ -174,6 +175,29 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$jwt$2e$ts__$5b$app$2d
 ;
 ;
 ;
+async function GET(request) {
+    try {
+        const authHeader = request.headers.get('authorization');
+        /*
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Token não fornecido' }, { status: 401 }
+      );
+    }
+*/ //const token = authHeader.split(' ')[1];
+        /*if (!token) {
+      return NextResponse.json({ error: "Erro interno do servidor" }, { status: 403 });
+    }*/ //const decode = await decoded(token);
+        return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
+            authHeader
+        });
+    } catch (error) {
+        return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
+            error: "Erro interno do servidor"
+        }, {
+            status: 403
+        });
+    }
+}
 async function POST(request) {
     try {
         const { username, password } = await request.json();

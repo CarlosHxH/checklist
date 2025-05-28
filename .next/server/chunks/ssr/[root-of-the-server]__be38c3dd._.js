@@ -78,7 +78,7 @@ const theme = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2
         },
         background: {
             default: '#f0f2f5',
-            paper: '#ffffff'
+            paper: '#4791db'
         },
         text: {
             primary: '#222',
@@ -122,11 +122,11 @@ const themes = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$
         light: {
             palette: {
                 mode: 'light',
-                /*
-        background: {
-          default: '#F9F9FE',
-          paper: '#1976d2',//'#EEEEF9',
-        },*/ primary: {
+                background: {
+                    default: '#F9F9FE',
+                    paper: '#1976d2'
+                },
+                primary: {
                     main: '#1976d2',
                     light: '#63a4ff',
                     dark: '#004ba0',
@@ -226,12 +226,17 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$theme$2e$ts__$
 ;
 // Create a client component wrapper to handle the theme
 const ThemeWrapper = ({ children })=>{
+    const colorPalette = [
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$theme$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["themes"].palette.primary.dark,
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$theme$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["themes"].palette.primary.main,
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$theme$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["themes"].palette.primary.light
+    ];
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$styles$2f$ThemeProvider$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__ThemeProvider$3e$__["ThemeProvider"], {
-        theme: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$theme$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["theme"],
+        theme: colorPalette,
         children: children
     }, void 0, false, {
         fileName: "[project]/src/app/ThemeWrapper.tsx",
-        lineNumber: 9,
+        lineNumber: 13,
         columnNumber: 7
     }, this);
 };

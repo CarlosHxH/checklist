@@ -10,7 +10,7 @@ export const theme = createTheme({
     },
     background: {
       default: '#f0f2f5',
-      paper: '#ffffff',
+      paper: '#4791db',
     },
     text: {
       primary: '#222',
@@ -47,6 +47,8 @@ export const theme = createTheme({
   },
 });
 
+
+
 export const themes = createTheme({
   cssVariables: {
     colorSchemeSelector: 'data-toolpad-color-scheme',
@@ -54,11 +56,11 @@ export const themes = createTheme({
   colorSchemes: {
     light: {
       palette: {
-        mode: 'light',/*
+        mode: 'light',
         background: {
           default: '#F9F9FE',
           paper: '#1976d2',//'#EEEEF9',
-        },*/
+        },
         primary: {
           main: '#1976d2',
           light: '#63a4ff',

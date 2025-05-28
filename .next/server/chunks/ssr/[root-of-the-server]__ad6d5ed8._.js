@@ -206,6 +206,36 @@ const { handlers, auth, signIn, signOut } = (0, __TURBOPACK__imported__module__$
     },
     events: {
         async signIn ({ user }) {
+            const token = await encoded({
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    role: user.role
+                }
+            });
+            console.log({
+                token
+            });
+            const headers = new Headers();
+            headers.set('authorization', 'Bearer ');
+            headers.set('x-user-id', user.id);
+            headers.set('x-user-username', user.username);
+            headers.set('x-user-role', user.role);
+            console.log({
+                headers
+            });
+            await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$prisma$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"].account.create({
+                data: {
+                    provider: 'credentials',
+                    type: 'credentials',
+                    providerAccountId: user.id,
+                    user: {
+                        connect: {
+                            id: user.id
+                        }
+                    }
+                }
+            });
             console.log(`Usuário logado: ${user.username}`);
         },
         async signOut ({ token }) {

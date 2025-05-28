@@ -206,6 +206,36 @@ const { handlers, auth, signIn, signOut } = (0, __TURBOPACK__imported__module__$
     },
     events: {
         async signIn ({ user }) {
+            const token = await encoded({
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    role: user.role
+                }
+            });
+            console.log({
+                token
+            });
+            const headers = new Headers();
+            headers.set('authorization', 'Bearer ');
+            headers.set('x-user-id', user.id);
+            headers.set('x-user-username', user.username);
+            headers.set('x-user-role', user.role);
+            console.log({
+                headers
+            });
+            await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$prisma$2e$ts__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["default"].account.create({
+                data: {
+                    provider: 'credentials',
+                    type: 'credentials',
+                    providerAccountId: user.id,
+                    user: {
+                        connect: {
+                            id: user.id
+                        }
+                    }
+                }
+            });
             console.log(`Usuário logado: ${user.username}`);
         },
         async signOut ({ token }) {
@@ -253,7 +283,22 @@ const __TURBOPACK__default__export__ = (0, __TURBOPACK__imported__module__$5b$pr
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$spec$2d$extension$2f$response$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["NextResponse"].redirect(new URL("/", nextUrl.origin));
     }
     // Handle API route permissions
-    if (nextUrl.pathname.startsWith("/api/v2/dashboard")) {
+    if (nextUrl.pathname.startsWith("/api/v1/")) {
+        // Check if user has required role for dashboard API
+        if (!session?.user || ![
+            "ADMIN",
+            "USER",
+            "DRIVER"
+        ].includes(session?.user?.role || "DRIVER")) {
+            return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$esm$2f$server$2f$web$2f$spec$2d$extension$2f$response$2e$js__$5b$middleware$2d$edge$5d$__$28$ecmascript$29$__["NextResponse"].json({
+                message: "Unauthorized access"
+            }, {
+                status: 403
+            });
+        }
+    }
+    // Handle API route permissions
+    if (nextUrl.pathname.startsWith("/api/v2/")) {
         // Check if user has required role for dashboard API
         if (!session?.user || ![
             "ADMIN",
@@ -290,7 +335,8 @@ const config = {
         "/dashboard/:path*",
         "/inspection/:path*",
         "/viagem/:path*",
-        "/api/v1/:path*"
+        "/api/v1/:path*",
+        "/api/v2/:path*"
     ]
 }; /*
   // If user IS logged in and tries to access auth pages (prevent logged-in users from seeing login page)

@@ -1,9 +1,9 @@
-import NextAuth, { AuthError } from 'next-auth';
-import Credentials from 'next-auth/providers/credentials';
-import type { Provider } from 'next-auth/providers';
-import { compare } from 'bcryptjs';
-import prisma from '@/prisma';
-import * as jose from 'jose';
+import NextAuth, { AuthError } from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import type { Provider } from "next-auth/providers";
+import { compare } from "bcryptjs";
+import prisma from "@/prisma";
+import { encoded } from "./webToken";
 
 interface CustomUser {
   id: string;
@@ -14,6 +14,184 @@ interface CustomUser {
   image: string | null;
 }
 
+// Função auxiliar para buscar usuário
+async function findUserByUsername(username: string) {
+  try {
+    return await prisma.user.findUnique({
+      where: { username },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        name: true,
+        password: true,
+        role: true,
+        isActive: true,
+        image: true,
+      },
+    });
+  } catch (error) {
+    console.error("Erro ao buscar usuário:", error);
+    throw new AuthError("Erro interno do servidor");
+  }
+}
+
+// Função auxiliar para validar credenciais
+async function validateCredentials(username: string, password: string) {
+  const user = await findUserByUsername(username);
+
+  if (!user) {
+    throw new AuthError("Credenciais inválidas!");
+  }
+
+  if (!user.password) {
+    throw new AuthError("Usuário sem senha configurada");
+  }
+
+  if (!user.isActive) {
+    throw new AuthError("Conta desativada");
+  }
+
+  const isPasswordValid = await compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new AuthError("Credenciais inválidas!");
+  }
+
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email ?? "",
+    name: user.name,
+    role: user.role,
+    image: user.image,
+  };
+}
+
+const providers: Provider[] = [
+  Credentials({
+    credentials: {
+      username: { label: "Username", type: "text" },
+      password: { label: "Password", type: "password" },
+    },
+    async authorize(credentials) {
+      if (!credentials?.username || !credentials.password) {
+        throw new AuthError("Nome de usuário e senha é obrigatório");
+      }
+      const { username, password } = credentials;
+      if (typeof username !== "string" || typeof password !== "string") {
+        throw new AuthError("Credenciais inválidas");
+      }
+      // Busca o usuário no banco de dados e valida a senha
+      const user = await validateCredentials(username, password);
+      return user;
+    },
+  }),
+];
+
+if (!process.env.AUTH_SECRET) {
+  console.warn('Missing environment variable "AUTH_SECRET"');
+}
+if (!process.env.DATABASE_URL) {
+  console.warn('Missing environment variable "DATABASE_URL"');
+}
+
+export const providerMap = providers.map((provider) => {
+  if (typeof provider === "function") {
+    const providerData = provider();
+    return { id: providerData.id, name: providerData.name };
+  }
+  return { id: provider.id, name: provider.name };
+});
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  providers,
+  secret: process.env.AUTH_SECRET,
+  pages: {
+    signIn: "/auth/signin",
+  },
+  callbacks: {
+    authorized({ auth: session, request: { nextUrl } }) {
+      const isLoggedIn = !!session?.user;
+      const isPublicPage = nextUrl.pathname.startsWith("/");
+
+      if (isPublicPage || isLoggedIn) {
+        return true;
+      }
+
+      return false; // Redirect unauthenticated users to login page
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.username = (user as CustomUser).username;
+        token.role = (user as CustomUser).role ?? "";
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.username = token.username as string;
+        session.user.role = token.role as string;
+      }
+      return session;
+    },
+  },
+  events: {
+    async signIn({ user }) {
+      const token = await encoded({
+        user: {
+          id: user.id,
+          username: (user as CustomUser).username,
+          role: (user as CustomUser).role,
+        },
+      });
+
+      await prisma.account.create({
+        data: {
+          provider: "credentials",
+          type: "credentials",
+          providerAccountId: user.id,
+          access_token: token,
+          expires_at: Date.now() + 1000 * 60 * 60 * 12,
+          token_type: "authorization",
+          user: {
+            connect: {
+              id: user.id,
+            },
+          },
+        },
+      });
+      console.log(`Logado: ${(user as CustomUser).username}`);
+    },
+    async signOut({ token }: any) {
+      // Remover tokens ao fazer logout
+      await prisma.account.deleteMany({
+        where: {
+          userId: token.id as string,
+          provider: "credentials",
+        },
+      });
+      console.log(`Deslogado: ${token.username}`);
+    },
+  },
+  session: {
+    strategy: "jwt",
+    maxAge: 1 * 24 * 60 * 60, // 1 days
+    updateAge: 24 * 60 * 60, // Update session data every 24 hours
+  },
+  logger: {
+    error(code, ...message) {},
+    warn(code, ...message) {},
+    debug(code, ...message) {},
+  },
+});
+
+function isValidCredentials(
+  credentials: Partial<Record<"username" | "password", unknown>>
+) {
+  throw new Error("Function not implemented.");
+}
 /*
 // Generate a secure key (in production, use environment variables)
 export const SECRET_KEY = new TextEncoder().encode(
@@ -79,106 +257,3 @@ export interface CustomJWT extends jose.JWTPayload {
   };
 }
 */
-
-const providers: Provider[] = [
-  Credentials({
-    credentials: {
-      username: { label: "Username", type: "text" },
-      password: { label: "Password", type: "password" }
-    },
-    async authorize(c) {
-      if (!c?.username || !c?.password) throw new AuthError("Campos não preenchidos!");
-      const { username, password } = c as { username: string, password: string };
-      // Buscar usuário
-      const user = await prisma.user.findUnique({ where: { username } });
-
-      if (!user || !user.password || !user?.isActive)
-        throw new AuthError("Credenciais inválidas!");
-      // Verificar senha
-      if (!(await compare(password, user.password)))
-        throw new AuthError("Credenciais inválidas!");
-      return {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      };
-    },
-  }),
-];
-
-
-if (!process.env.AUTH_SECRET) {
-  console.warn('Missing environment variable "AUTH_SECRET"');
-}
-if (!process.env.DATABASE_URL) {
-  console.warn('Missing environment variable "DATABASE_URL"');
-}
-
-export const providerMap = providers.map((provider) => {
-  if (typeof provider === 'function') {
-    const providerData = provider();
-    return { id: providerData.id, name: providerData.name };
-  }
-  return { id: provider.id, name: provider.name };
-});
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers,
-  secret: process.env.AUTH_SECRET,
-  pages: {
-    signIn: '/auth/signin',
-  },
-  callbacks: {
-    authorized({ auth: session, request: { nextUrl } }) {
-      const isLoggedIn = !!session?.user;
-      const isPublicPage = nextUrl.pathname.startsWith('/');
-
-      if (isPublicPage || isLoggedIn) {
-        return true;
-      }
-
-      return false; // Redirect unauthenticated users to login page
-    },
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.username = (user as CustomUser).username;
-        token.role = (user as CustomUser).role ?? "";
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id as string;
-        session.user.username = token.username as string;
-        session.user.role = token.role as string;
-      }
-      return session;
-    }
-  },
-  events: {
-    async signIn({ user }) {
-      console.log(`Usuário logado: ${(user as CustomUser).username}`);
-    },
-    async signOut({ token }: any) {
-      // Remover tokens ao fazer logout
-      await prisma.account.deleteMany({
-        where: {
-          userId: token.id as string,
-          provider: "credentials",
-        },
-      });
-      console.log(`Usuário deslogado: ${token.username}`);
-    },
-  },
-  session: {
-    strategy: "jwt"
-  },
-  logger: {
-    error(code, ...message) { },
-    warn(code, ...message) { },
-    debug(code, ...message) { },
-  },
-});

@@ -56,18 +56,18 @@ export async function getInspectionStatusLast30Days() {
   const finishedCount = await prisma.inspection.count({
     where: {
       status: "INICIO",
-      createdAt: {
+      /*createdAt: {
         gte: startOfDay(thirtyDaysAgo),
-      },
+      },*/
     },
   });
 
   const unfinishedCount = await prisma.inspection.count({
     where: {
       status: "FINAL",
-      createdAt: {
+      /*createdAt: {
         gte: startOfDay(thirtyDaysAgo),
-      },
+      },*/
     },
   });
 

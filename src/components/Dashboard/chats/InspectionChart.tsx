@@ -29,12 +29,8 @@ export default function InspectionChart({ data }: Props) {
             color: '#8884d8',
           },
         ]}
-        margin={{ top: 20, right: 30, bottom: 30, left: 40 }}
-        slotProps={{
-          legend: {
-            hidden: true,
-          },
-        }}
+        margin={{ top: 20, right: 30, bottom: 20, left: 40 }}
+        slotProps={{ legend: { hidden: true } }}
       />
     </Box>
   );

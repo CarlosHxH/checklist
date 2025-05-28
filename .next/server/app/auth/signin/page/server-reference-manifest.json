@@ -8,29 +8,7 @@
         }
       },
       "layer": {
-        "app/auth/signin/page": "rsc"
-      }
-    },
-    "7f4413d87465421fd26bdbb1d510ddf7da27273a73": {
-      "workers": {
-        "app/auth/signin/page": {
-          "moduleId": "[project]/.next-internal/server/app/auth/signin/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/auth/signin/action.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/auth/signin/page": "rsc"
-      }
-    },
-    "7fd092e64a819b9f92017395a6f708049e473390a1": {
-      "workers": {
-        "app/auth/signin/page": {
-          "moduleId": "[project]/.next-internal/server/app/auth/signin/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/auth/signin/action.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/auth/signin/page": "rsc"
+        "app/auth/signin/page": "action-browser"
       }
     }
   },
