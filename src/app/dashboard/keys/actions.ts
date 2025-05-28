@@ -1,175 +1,112 @@
 import { DataModel, DataSource } from "@toolpad/core/Crud";
-
-export interface Note extends DataModel {
-  id: number;
-  title: string;
-  text: string;
+import axios from 'axios';
+export interface Data extends DataModel {
+  id: string;
+  vehicle: string;
+  username: string;
+  status: string;
+  vehicles?: any[];
+  users?: any[];
 }
 
-export let notesStore: Note[] = [
-  { id: 1, title: "Grocery List Item", text: "Buy more coffee." },
-  { id: 2, title: "Personal Goal", text: "Finish reading the book." },
-];
+let data: Data[] = [];
 
-export const notesDataSource: DataSource<Note> = {
+export const dataSource: DataSource<Data> &
+  Required<Pick<DataSource<Data>, 'getMany' | 'updateOne' | 'getOne' | 'createOne' | 'deleteOne' | 'fields' | 'validate'>> = {
   fields: [
-    { field: "id", headerName: "ID" },
-    { field: "title", headerName: "Title", flex: 1 },
-    { field: "text", headerName: "Text", flex: 1 },
+    { field: 'id', headerName: 'ID' },
+    {
+      field: 'vehicle',
+      headerName: 'VEICULO',
+      flex: 1,
+      type: 'singleSelect',
+      editable: true,
+    },
+    { field: 'username', headerName: 'USUÁRIO', width: 200, editable: true, valueOptions: [] },
+    { field: 'status', headerName: 'STATUS', type: 'singleSelect', editable: true, valueOptions: ['PENDENTE', 'CONFIRMADO'], width: 150 },
   ],
-
   getMany: async ({ paginationModel, filterModel, sortModel }) => {
-    // Simulate loading delay
-    await new Promise((resolve) => {
-      setTimeout(resolve, 750);
-    });
+    try {
+      const response = await axios.get('/api/v2/dashboard/keys');
+      const apiData = response.data;
+      data = apiData || [];
+      if (!apiData) {
+        return { items: [], itemCount: 0 };
+      }
 
-    let processedNotes = [...notesStore];
+      const processedPeople = (apiData?.vehicleKeys || []).map((key: any) => ({
+        id: key.id,
+        vehicle: key.vehicle.plate + " - " + key.vehicle.model,
+        username: key.user.name || '',
+        status: key.status || 'PENDING',
+        users: key.user || [],
+        vehicles: key.vehicles || [],
+      }));
 
-    // Apply filters (demo only)
-    if (filterModel?.items?.length) {
-      filterModel.items.forEach(({ field, value, operator }) => {
-        if (!field || value == null) {
-          return;
-        }
+      const start = paginationModel.page * paginationModel.pageSize;
+      const end = start + paginationModel.pageSize;
+      const paginatedPeople = processedPeople.slice(start, end);
 
-        processedNotes = processedNotes.filter((note) => {
-          const noteValue = note[field];
-
-          switch (operator) {
-            case "contains":
-              return String(noteValue)
-                .toLowerCase()
-                .includes(String(value).toLowerCase());
-            case "equals":
-              return noteValue === value;
-            case "startsWith":
-              return String(noteValue)
-                .toLowerCase()
-                .startsWith(String(value).toLowerCase());
-            case "endsWith":
-              return String(noteValue)
-                .toLowerCase()
-                .endsWith(String(value).toLowerCase());
-            case ">":
-              return (noteValue as number) > value;
-            case "<":
-              return (noteValue as number) < value;
-            default:
-              return true;
-          }
-        });
-      });
+      return { items: paginatedPeople, itemCount: processedPeople.length };
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      return { items: [], itemCount: 0 };
     }
-
-    // Apply sorting
-    if (sortModel?.length) {
-      processedNotes.sort((a, b) => {
-        for (const { field, sort } of sortModel) {
-          if ((a[field] as number) < (b[field] as number)) {
-            return sort === "asc" ? -1 : 1;
-          }
-          if ((a[field] as number) > (b[field] as number)) {
-            return sort === "asc" ? 1 : -1;
-          }
-        }
-        return 0;
-      });
+  },
+  deleteOne: async (personId) => {
+    try {
+      await axios.delete(`/api/v2/dashboard/keys/reject/${personId}`);
+      console.log(`Item with id ${personId} deleted successfully`);
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      throw error;
     }
-
-    // Apply pagination
-    const start = paginationModel.page * paginationModel.pageSize;
-    const end = start + paginationModel.pageSize;
-    const paginatedNotes = processedNotes.slice(start, end);
-
+  },
+  getOne: async (id: string | number) => {
+    const response = await axios.get(`/api/v2/dashboard/keys/${id}`);
+    const key = response.data;
     return {
-      items: paginatedNotes,
-      itemCount: processedNotes.length,
+      id: key.id,
+      vehicle: key.vehicle.plate + " - " + key.vehicle.model,
+      username: key.user.name || '',
+      status: key.status,
+      users: key.user || [],
+      vehicles: key.vehicles || [],
     };
   },
-
-  getOne: async (noteId) => {
-    // Simulate loading delay
-    await new Promise((resolve) => {
-      setTimeout(resolve, 750);
-    });
-
-    const noteToShow = notesStore.find((note) => note.id === Number(noteId));
-
-    if (!noteToShow) {
-      throw new Error("Note not found");
-    }
-    return noteToShow;
+  updateOne: async (id: string | number, data: Partial<Omit<Data, "id">>) => {
+    const response = await axios.put(`/api/v2/dashboard/keys/${id}`, data);
+    const key = response.data;
+    return {
+      id: key.id,
+      vehicle: key.vehicle.plate + " - " + key.vehicle.model,
+      username: key.user.name || '',
+      status: key.status,
+      users: key.user || [],
+      vehicles: key.vehicles || [],
+    };
   },
-
-  createOne: async (data) => {
-    // Simulate loading delay
-    await new Promise((resolve) => {
-      setTimeout(resolve, 750);
-    });
-
-    const newNote = {
-      id: notesStore.reduce((max, note) => Math.max(max, note.id), 0) + 1,
-      ...data,
-    } as Note;
-
-    notesStore = [...notesStore, newNote];
-
-    return newNote;
+  createOne: async (data: Omit<Data, "id">) => {
+    const response = await axios.post(`/api/v2/dashboard/keys`, data);
+    const key = response.data;
+    return {
+      id: key.id,
+      vehicle: key.vehicle.plate + " - " + key.vehicle.model,
+      username: key.user.name || '',
+      status: key.status,
+      users: key.user || [],
+      vehicles: key.vehicles || [],
+    };
   },
-
-  updateOne: async (noteId, data) => {
-    // Simulate loading delay
-    await new Promise((resolve) => {
-      setTimeout(resolve, 750);
-    });
-
-    let updatedNote: Note | null = null;
-
-    notesStore = notesStore.map((note) => {
-      if (note.id === Number(noteId)) {
-        updatedNote = { ...note, ...data };
-        return updatedNote;
-      }
-      return note;
-    });
-
-    if (!updatedNote) {
-      throw new Error("Note not found");
+  validate: async (data: Partial<Data>) => {
+    // Example validation: check required fields
+    const issues: { path: (string | number)[]; message: string }[] = [];
+    if (!data.vehicle) issues.push({ path: ['vehicle'], message: "Vehicle is required" });
+    if (!data.username) issues.push({ path: ['username'], message: "Username is required" });
+    if (!data.status) issues.push({ path: ['status'], message: "Status is required" });
+    if (issues.length > 0) {
+      return { issues };
     }
-    return updatedNote;
-  },
-
-  deleteOne: async (noteId) => {
-    // Simulate loading delay
-    await new Promise((resolve) => {
-      setTimeout(resolve, 750);
-    });
-
-    notesStore = notesStore.filter((note) => note.id !== Number(noteId));
-  },
-
-  validate: (formValues) => {
-    let issues: { message: string; path: [keyof Note] }[] = [];
-
-    if (!formValues.title) {
-      issues = [...issues, { message: "Title is required", path: ["title"] }];
-    }
-
-    if (formValues.title && formValues.title.length < 3) {
-      issues = [
-        ...issues,
-        {
-          message: "Title must be at least 3 characters long",
-          path: ["title"],
-        },
-      ];
-    }
-
-    if (!formValues.text) {
-      issues = [...issues, { message: "Text is required", path: ["text"] }];
-    }
-
-    return { issues };
+    return { value: data };
   },
 };

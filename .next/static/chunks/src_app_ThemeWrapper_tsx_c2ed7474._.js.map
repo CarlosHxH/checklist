@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/carlos.dias/Documents/Apps/mui_CHECKLIST/src/app/ThemeWrapper.tsx"],"sourcesContent":["'use client';\r\nimport React from \"react\";\r\nimport { ThemeProvider, useTheme } from \"@mui/material\";\r\nimport { theme } from \"./theme\";\r\n// Create a client component wrapper to handle the theme\r\nconst ThemeWrapper = ({ children }:{ children: React.ReactNode }) => {\r\n  const themes = useTheme();\r\n  const colorPalette = [\r\n    themes.palette.primary.dark,\r\n    themes.palette.primary.main,\r\n    themes.palette.primary.light,\r\n  ];\r\n    return (\r\n      <ThemeProvider theme={colorPalette}>\r\n        {children}\r\n      </ThemeProvider>\r\n    );\r\n  };\r\nexport default ThemeWrapper;"],"names":[],"mappings":";;;;AAEA;AAAA;;;AAFA;;AAIA,wDAAwD;AACxD,MAAM,eAAe,CAAC,EAAE,QAAQ,EAAgC;;IAC9D,MAAM,SAAS,CAAA,GAAA,iMAAA,CAAA,WAAQ,AAAD;IACtB,MAAM,eAAe;QACnB,OAAO,OAAO,CAAC,OAAO,CAAC,IAAI;QAC3B,OAAO,OAAO,CAAC,OAAO,CAAC,IAAI;QAC3B,OAAO,OAAO,CAAC,OAAO,CAAC,KAAK;KAC7B;IACC,qBACE,6LAAC,2MAAA,CAAA,gBAAa;QAAC,OAAO;kBACnB;;;;;;AAGP;GAZI;;QACW,iMAAA,CAAA,WAAQ;;;KADnB;uCAaS","debugId":null}}]
-}
