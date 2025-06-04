@@ -1,3 +1,4 @@
+// action.ts
 "use server";
 import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
@@ -39,9 +40,9 @@ export default async function authenticate(
     }
     // Handle Auth.js errors
     if (error instanceof AuthError) {
-      const errorMessage = error.message.split(". Read more")[0].trim();
+      //const errorMessage = error.message.split(". Read more")[0].trim();
       return {
-        error: error.cause || errorMessage,
+        error: error.cause || error.message,
         type: (error as any).type,
       };
     }
