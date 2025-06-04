@@ -1,4 +1,4 @@
-// auth
+// auth.ts - Versão corrigida
 import NextAuth, { AuthError, CredentialsSignin } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import type { Provider } from 'next-auth/providers';
@@ -10,7 +10,7 @@ interface CustomUser {
   id: string;
   role: string;
   username: string;
-  email: string; // Changed from string | null to string
+  email: string;
   name: string;
   image: string | null;
 }
@@ -33,43 +33,44 @@ async function findUserByUsername(username: string) {
     });
   } catch (error) {
     console.error('Erro ao buscar usuário:', error);
-    throw new AuthError('Erro interno do servidor');
+    return null; // Retorna null em vez de lançar exceção
   }
 }
 
-// Função auxiliar para validar credenciais
+// Função auxiliar para validar credenciais - CORRIGIDA
 async function validateCredentials(username: string, password: string) {
   const user = await findUserByUsername(username);
 
+  // Retorna null para falhas de validação em vez de lançar exceções
   if (!user) {
-    throw new CredentialsSignin('Credenciais inválidas!');
+    console.log(`Tentativa de login com usuário inexistente: ${username}`);
+    return null;
   }
 
   if (!user.password) {
-    throw new AuthError('Usuário sem senha configurada');
+    console.log(`Usuário ${username} sem senha configurada`);
+    return null;
   }
 
   if (!user.isActive) {
-    throw new AuthError('Conta desativada');
+    console.log(`Conta desativada para usuário: ${username}`);
+    return null;
   }
 
   const isPasswordValid = await compare(password, user.password);
   if (!isPasswordValid) {
-    throw new AuthError('Credenciais inválidas!');
+    console.log(`Credenciais inválidas para usuário: ${username}`);
+    return null;
   }
 
   return {
     id: user.id,
     username: user.username,
-    email: user.email || '', // Ensure email is never null
+    email: user.email || '',
     name: user.name,
     role: user.role,
     image: user.image,
   };
-}
-
-class CustomError extends CredentialsSignin {
-  code = "custom_error";
 }
 
 const providers: Provider[] = [
@@ -82,26 +83,34 @@ const providers: Provider[] = [
       try {
         // Validate that credentials exist
         if (!credentials?.username || !credentials?.password) {
+          console.log('Credenciais não fornecidas');
           return null;
         }
 
         const { username, password } = credentials as { username: string; password: string };
-        
+
         // Validate credentials and get user
         const user = await validateCredentials(username, password);
-        
+
+        if (!user) {
+          // Log sem detalhes sensíveis
+          console.log('Falha na autenticação');
+          return null;
+        }
+
+        console.log(`Login bem-sucedido para usuário: ${user.username}`);
+
         // Return user in NextAuth User format
         return {
           id: user.id,
           name: user.name,
-          email: user.email || '', // Ensure email is never null
+          email: user.email,
           image: user.image,
           username: user.username,
           role: user.role,
         };
       } catch (error) {
-        console.error('Erro na autorização:', error);
-        // Return null instead of throwing to indicate authentication failure
+        console.error('Erro inesperado na autorização:', error);
         return null;
       }
     },
@@ -138,7 +147,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return true;
       }
 
-      return false; // Redirect unauthenticated users to login page
+      return false;
     },
     async jwt({ token, user }) {
       if (user) {
@@ -167,39 +176,40 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             role: (user as CustomUser).role,
           }
         });
-
-        await prisma.account.create({
-          data: {
-            provider: 'credentials',
-            type: 'credentials',
-            providerAccountId: user.id,
-            access_token: token,
-            expires_at: Date.now() + 1000 * 60 * 60 * 12,
-            token_type: 'authorization',
-            user: {
-              connect: {
-                id: user.id
+        
+        if (token) {
+          const novaData = Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 1);
+          await prisma.account.create({
+            data: {
+              provider: 'credentials',
+              type: 'credentials',
+              providerAccountId: user.id,
+              access_token: token,
+              expires_at: novaData,
+              token_type:'authorization',
+              user: {
+                connect: {
+                  id: user.id
+                }
               }
             }
-          }
-        });
-        
-        console.log(`Logado: ${(user as CustomUser).username}`);
+          });
+        }
+        console.log(`Usuário logado com sucesso: ${(user as CustomUser).username}`);
       } catch (error) {
         console.error('Erro ao criar account no signIn:', error);
       }
     },
     async signOut({ token }: any) {
       try {
-        // Remover tokens ao fazer logout
         await prisma.account.deleteMany({
           where: {
             userId: token.id as string,
             provider: "credentials",
           }
         });
-        
-        console.log(`Deslogado: ${token.username}`);
+
+        console.log(`Usuário deslogado: ${token.username}`);
       } catch (error) {
         console.error('Erro ao remover tokens no signOut:', error);
       }
@@ -211,14 +221,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     updateAge: 24 * 60 * 60 // Update session data every 24 hours
   },
   logger: {
-    error(code, ...message) { 
-      console.error(`NextAuth Error [${code}]:`, ...message);
+    error(code, ...message) {
+      // Filtrar logs desnecessários de CredentialsSignin
+      //if (code !== 'CREDENTIALS_SIGNIN_ERROR') {
+      //}
+      //console.error(`NextAuth Error [${code}]:`, ...message);
     },
-    warn(code, ...message) { 
-      console.warn(`NextAuth Warning [${code}]:`, ...message);
+    warn(code, ...message) {
+      //console.warn(`NextAuth Warning [${code}]:`, ...message);
     },
-    debug(code, ...message) { 
-      console.debug(`NextAuth Debug [${code}]:`, ...message);
+    debug(code, ...message) {
+      // Comentar em produção
+      // console.debug(`NextAuth Debug [${code}]:`, ...message);
     },
   },
 });

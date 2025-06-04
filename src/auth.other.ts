@@ -73,10 +73,10 @@ class CustomError extends CredentialsSignin {
 }
 
 function isValidCredentials(credentials: Partial<Record<"username" | "password", unknown>>) {
-  if (!credentials.username||credentials.password) {
+  if (!credentials.username || credentials.password) {
     throw new AuthError('Credencial não preenchidas!')
   }
-  return validateCredentials(String(credentials?.username),String(credentials.password))
+  return validateCredentials(String(credentials?.username), String(credentials.password))
 }
 function getUser(credentials: Partial<Record<"username" | "password", unknown>>): import("next-auth").User | PromiseLike<import("next-auth").User | null> | null {
   throw new Error('Function not implemented.');
@@ -187,22 +187,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           role: (user as CustomUser).role,
         }
       });
-
-      await prisma.account.create({
-        data: {
-          provider: 'credentials',
-          type: 'credentials',
-          providerAccountId: user.id,
-          access_token: token,
-          expires_at: Date.now() + 1000 * 60 * 60 * 12,
-          token_type: 'authorization',
-          user: {
-            connect: {
-              id: user.id
+      if (token) {
+        await prisma.account.create({
+          data: {
+            provider: 'credentials',
+            type: 'credentials',
+            providerAccountId: user.id,
+            access_token: token,
+            expires_at: Date.now() + 1000 * 60 * 60 * 12,
+            token_type: 'authorization',
+            user: {
+              connect: {
+                id: user.id
+              }
             }
           }
-        }
-      });
+        });
+      }
       console.log(`Logado: ${(user as CustomUser).username}`);
     },
     async signOut({ token }: any) {

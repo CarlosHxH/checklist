@@ -1,4 +1,4 @@
-// action.ts
+// action.ts - Versão corrigida
 "use server";
 import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
@@ -8,10 +8,13 @@ export const login: (
   provider: AuthProvider,
   formData: FormData,
 ) => void = async (provider, formData) => {
-  const promise = new Promise<void>(async(resolve,reject) => {
+  const promise = new Promise<void>(async(resolve, reject) => {
     try {
       const res = await signIn(provider.id, {
-        ...(formData && { username: formData.get('email'), password: formData.get('password') }),
+        ...(formData && { 
+          username: formData.get('email'), 
+          password: formData.get('password') 
+        }),
         redirect: false
       });
       console.log(res);
@@ -30,7 +33,10 @@ export default async function authenticate(
 ) {
   try {
     return await signIn(provider.id, {
-      ...(formData && { username: formData.get('email'), password: formData.get('password') }),
+      ...(formData && { 
+        username: formData.get('email'), 
+        password: formData.get('password') 
+      }),
       redirectTo: callbackUrl ?? '/',
     });
   } catch (error) {
@@ -38,24 +44,42 @@ export default async function authenticate(
     if (error instanceof Error && error.message === "NEXT_REDIRECT") {
       throw error;
     }
+    
     // Handle Auth.js errors
     if (error instanceof AuthError) {
-      //const errorMessage = error.message.split(". Read more")[0].trim();
+      // Mapear diferentes tipos de erro para mensagens mais amigáveis
+      let errorMessage = "Erro na autenticação";
+      
+      switch ((error as any).type) {
+        case 'CredentialsSignin':
+          errorMessage = "Usuário ou senha inválidos";
+          break;
+        case 'CallbackRouteError':
+          errorMessage = "Erro no processo de login";
+          break;
+        case 'AccessDenied':
+          errorMessage = "Acesso negado";
+          break;
+        default:
+          errorMessage = "Erro na autenticação";
+      }
+      
       return {
-        error: error.cause || error.message,
+        error: errorMessage,
         type: (error as any).type,
       };
     }
 
     // Handle any other errors
+    console.error('Erro não tratado na autenticação:', error);
     return {
-      error: "Algo deu errado.",
+      error: "Algo deu errado. Tente novamente.",
       type: "UnknownError",
     };
   }
 }
 
-
+// Função de teste mais limpa
 export const testAuth = async (
   provider: AuthProvider,
   formData: FormData,
@@ -65,7 +89,7 @@ export const testAuth = async (
   try {
     return await signIn(provider.id, {
       ...(formData && {
-        email: formData.get('email'),
+        username: formData.get('email'), // Corrigido: usar 'username' consistentemente
         password: formData.get('password'),
       }),
       redirectTo: callbackUrl ?? '/',
@@ -74,17 +98,18 @@ export const testAuth = async (
     if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
       throw error;
     }
+    
     if (error instanceof AuthError) {
       return {
-        error:
-          (error as any).type === 'CredentialsSignin'
-            ? 'Invalid credentials.'
-            : 'An error with Auth.js occurred.',
+        error: (error as any).type === 'CredentialsSignin'
+          ? 'Usuário ou senha inválidos'
+          : 'Erro no processo de autenticação',
         type: (error as any).type,
       };
     }
+    
     return {
-      error: 'Something went wrong.',
+      error: 'Algo deu errado. Tente novamente.',
       type: 'UnknownError',
     };
   }

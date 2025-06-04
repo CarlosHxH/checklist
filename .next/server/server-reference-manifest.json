@@ -1,17 +1,5 @@
 {
-  "node": {
-    "703d010df910d960ee1ec1d11b87e471ad11e61bcb": {
-      "workers": {
-        "app/auth/signin/page": {
-          "moduleId": "[project]/.next-internal/server/app/auth/signin/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/auth/signin/action.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/auth/signin/page": "action-browser"
-      }
-    }
-  },
+  "node": {},
   "edge": {},
   "encryptionKey": "/v8dZ7dadumFz58oRUz2pYCmPunu8Z8Y7WgqBGLF66g="
 }
