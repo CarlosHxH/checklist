@@ -11,7 +11,6 @@ export const dataSource = {
         { field: 'status', headerName: 'Status', flex: 1 },
     ],
     getMany: async () => {
-        const { data, isLoading } = useSWR('/api/v2/dashboard/viagens', fetcher);/*
         // Fetch data from server ?${queryParams.toString()}
         const res = await fetch(`/api/v2/dashboard/viagens`, {
             method: 'GET',
@@ -20,11 +19,11 @@ export const dataSource = {
 
         if (!res.ok) {
             throw new Error(resJson.error);
-        }*/
+        }
         return {
-            data,
-            itemCount: data.length,
-            isLoading
+            data: resJson,
+            itemCount: resJson.length,
+            isLoading: false
         };
     },
     getOne: async (id:string| number) => {

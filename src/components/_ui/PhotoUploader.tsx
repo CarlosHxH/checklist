@@ -74,11 +74,12 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({ name, label, onChange, mu
               <Grid item key={index} xs={photos.length ===1?12:6} md={photos.length ===1?12:3} >
                 <Container>
                   <Image
+                    priority
                     width={100}
                     height={100}
                     src={URL.createObjectURL(photo)}
                     alt={`Foto ${index + 1}`}
-                    style={{ width: 'auto', height: '100px', objectFit: 'cover'}}
+                    style={{ objectFit: 'cover'}}
                   />
                   {isRemoved&&<Button color="error" sx={{mt:'auto'}} size='small' onClick={() => removePhoto(index)} fullWidth variant="outlined"><ClearIcon/></Button>}
                 </Container>

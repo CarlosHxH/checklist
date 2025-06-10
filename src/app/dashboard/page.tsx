@@ -20,7 +20,7 @@ import ChartByUsers from "@/components/Dashboard/chats/byUsers";
 export default function DashboardContent() {
   const router = useRouter();
   const { data, isLoading } = useSWR("/api/v2/dashboard", fetcher);
-
+  
   if (isLoading || !data) return <Loading />;
   if(data.error) return <></>;
 
@@ -45,7 +45,7 @@ export default function DashboardContent() {
             <Typography component="h2" variant="h6" sx={{ mb: 2 }}>Visão geral</Typography>
 
             <Grid container spacing={2} columns={12} sx={{ mb: (theme) => theme.spacing(2) }}>
-              {data && data.map((card: StatCardProps, index: number) => (
+              {data.cards && data.cards.map((card: StatCardProps, index: number) => (
                 <Grid key={index} size={{ xs: 6, sm: 3, lg: 3 }} onClick={() => redirect(card.title)} sx={{ cursor: "pointer" }}>
                   <StatCard {...card} />
                 </Grid>
@@ -81,7 +81,7 @@ export default function DashboardContent() {
               {false && <Grid size={{ xs: 12, sm: 6, lg: 6 }}><ChartByVehicle /></Grid>}
             </Grid>
             
-            <Grid size={{ xs: 12, sm: 6, lg: 6 }}><ChartByUsers /></Grid>
+            <Grid size={{ xs: 12, sm: 6, lg: 6 }}><ChartByUsers dataset={data.byUsers}/></Grid>
 
             {false && (
               <>

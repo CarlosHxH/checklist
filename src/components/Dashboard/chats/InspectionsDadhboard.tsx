@@ -39,8 +39,6 @@ export default function InspectionsDashboard() {
     fetchInspectionData();
   }, []);
 
-  // Não precisamos mais deste formato com o componente InspectionChart
-
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
@@ -119,9 +117,11 @@ export default function InspectionsDashboard() {
             <Typography variant="h3">
               {data.statusSummary.unfinishedPercentage||0}%
             </Typography>
-            <Typography variant="subtitle1" color="textSecondary">
-              {data.statusSummary.unfinished||0} de {data.statusSummary.total||0} inspeções finalizadas
-            </Typography>
+            <Box sx={{mt:4}}>
+              <Typography variant="subtitle1" color="textSecondary">
+                {data.statusSummary.unfinished||0} de {data.statusSummary.total||0} inspeções finalizadas
+              </Typography>
+            </Box>
           </CardContent>
         </Card>
       </Grid>

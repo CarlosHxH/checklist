@@ -38,41 +38,49 @@ export interface EixoSectionProps {
 }
 
 // Extracted to its own component for better readability
-export const EixoSection: React.FC<EixoSectionProps> = ({ 
-  eixoNumber, 
-  label, 
-  fieldName, 
-  selectedVehicle, 
-  control, 
-  register, 
-  watch, 
-  setValue 
+export const EixoSection: React.FC<EixoSectionProps> = ({
+  eixoNumber,
+  label,
+  fieldName,
+  selectedVehicle,
+  control,
+  register,
+  watch,
+  setValue
 }) => {
-  if (!selectedVehicle || Number(selectedVehicle.eixo) < Number(eixoNumber)) return null;
-  
   const currentValue = watch(fieldName);
   const field = `descricao${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}` as keyof InspectionFormData;
 
   useEffect(() => {
-    if (currentValue === "BOM") setValue(field, "");
-  }, [currentValue, field]);
+    // Only execute the effect if the component should be rendered
+    if (selectedVehicle && Number(selectedVehicle.eixo) >= Number(eixoNumber)) {
+      if (currentValue === "BOM") {
+        setValue(field, "");
+      }
+    }
+  }, [currentValue, field, setValue, selectedVehicle, eixoNumber]);
+
+  // Conditionally render the component
+  if (!selectedVehicle || Number(selectedVehicle.eixo) < Number(eixoNumber)) {
+    return null;
+  }
 
   return (
     <Grid item xs={12} md={6}>
-      <ButtonLabel 
-        label={label} 
-        name={fieldName} 
-        options={["BOM", "RUIM"]} 
-        control={control} 
-        rules={{ required: "Este campo é obrigatório" }} 
+      <ButtonLabel
+        label={label}
+        name={fieldName}
+        options={["BOM", "RUIM"]}
+        control={control}
+        rules={{ required: "Este campo é obrigatório" }}
       />
       {currentValue === "RUIM" && (
-        <TextField 
-          {...register(field, { required: "Este campo é obrigatório" })} 
-          label="Qual Defeito?" 
-          multiline 
-          fullWidth 
-          rows={2} 
+        <TextField
+          {...register(field, { required: "Este campo é obrigatório" })}
+          label="Qual Defeito?"
+          multiline
+          fullWidth
+          rows={2}
           error={!!watch(`${field}_error`)}
           helperText={watch(`${field}_error`)}
         />
@@ -80,6 +88,8 @@ export const EixoSection: React.FC<EixoSectionProps> = ({
     </Grid>
   );
 };
+
+
 
 const InspectionForm: React.FC<{ type: "INICIO" | "FINAL"; id: string }> = ({ type, id }) => {
   const [submitting, setSubmitting] = useState(false);
@@ -138,23 +148,23 @@ const InspectionForm: React.FC<{ type: "INICIO" | "FINAL"; id: string }> = ({ ty
       .finally(() => setLoadingData(false));
   }, [id, isExistingTrip, reset, session?.user?.id, type, setValue]);
 
-  // Set vehicle data when selected or loaded
-  useEffect(() => {
-    if (selectedVehicle) {
-      setValue("eixo", selectedVehicle.eixo);
-    }
-  }, [selectedVehicle, setValue]);
-
-  // Reset description fields based on main field values
   useEffect(() => {
     const avariasCabine = watch("avariasCabine");
     const bauPossuiAvarias = watch("bauPossuiAvarias");
     const funcionamentoParteEletrica = watch("funcionamentoParteEletrica");
-
+    const dianteira = watch("dianteira");
+    const tracao = watch("tracao");
+    const truck = watch("truck");
+    const quartoEixo = watch("quartoEixo");
     if (avariasCabine === "NÃO") setValue("descricaoAvariasCabine", '');
     if (bauPossuiAvarias === "NÃO") setValue("descricaoAvariasBau", '');
     if (funcionamentoParteEletrica === "BOM") setValue("descricaoParteEletrica", '');
-  }, [watch, setValue]);
+    if (dianteira === "BOM") setValue("descricaoDianteira", '');
+    if (tracao === "BOM") setValue("descricaoTracao", '');
+    if (truck === "BOM") setValue("descricaoTruck", '');
+    if (quartoEixo === "BOM") setValue("descricaoQuartoEixo", '');
+    if (selectedVehicle) setValue("eixo", selectedVehicle.eixo);
+  }, [watch, setValue, selectedVehicle]);
 
 
 
@@ -193,7 +203,6 @@ const InspectionForm: React.FC<{ type: "INICIO" | "FINAL"; id: string }> = ({ ty
         errorData.catch(() => null);
         throw new Error(errorData?.message || 'Failed to submit form');
       }
-
       // Success - redirect to home
       router.push('/');
     } catch (err: any) {

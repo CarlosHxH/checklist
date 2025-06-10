@@ -56,17 +56,17 @@ const NAVIGATION: Navigation = [
     segment: 'dashboard/users',
     title: 'Usúarios',
     icon: <LayersIcon />,
-  }
-];
-/*
+  },
   {
-    segment: '',
+    segment: '../',
     title: 'Checklist',
     icon: <LayersIcon />,
-  },*/
+  },
+];
+
 
 const BRANDING = {
-  title: '5S TRANSPORTES',
+  title: 'TRANSPORTES',
   logo: <Image priority style={{ marginLeft: '28px', width: 'auto', height: '100%' }} src="/logo.png" alt="logo" width={100} height={100} />,
 };
 
@@ -76,13 +76,12 @@ const AUTHENTICATION = {
 };
 
 export default function DashboardLayoutBasic(props: {children: React.ReactNode}) {
-  const { children } = props;
   const {data: session} = useSession()
   return (
     <ThemeWrapper>
       <AppProvider branding={BRANDING} navigation={NAVIGATION} session={session} authentication={AUTHENTICATION}>
         <DashboardLayout>
-          {children}
+          {props.children}
         </DashboardLayout>
       </AppProvider>
     </ThemeWrapper>

@@ -90,7 +90,7 @@ export default function VehicleKeysPage() {
     if (data && data.vehicleKeys.length > 0) {
       groupVehicleKeys()
     }
-  }, [data])
+  }, [data,groupedVehicleKeys])
 
   // Helper functions
   const groupVehicleKeys = useCallback(() => {

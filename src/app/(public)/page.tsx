@@ -37,10 +37,10 @@ export default function Page() {
 
   return (
     <Box>
-      <AppBar position="sticky" variant='elevation' color='primary' sx={{ boxShadow: '1px 1px 1px gray', zIndex: 1000 }}>
+      <AppBar position="relative" variant='elevation' color='transparent' sx={{ boxShadow: '1px 1px 1px gray', zIndex: 1000,marginBottom:2 }}>
         <Tabs value={v} onChange={handleChange} indicatorColor="primary" textColor="inherit" variant="fullWidth" aria-label="Page-tabs">
-          <Tab label={"VIAGENS"} sx={{ fontSize: '1rem', fontWeight: 'bold' }} />
-          <Tab label={"INSPEÇÕES"} sx={{ fontSize: '1rem', fontWeight: 'bold' }} />
+          <Tab label={"VIAGENS"} sx={{ fontSize: '.8rem', fontWeight: 'bold' }} />
+          <Tab label={"INSPEÇÕES"} sx={{ fontSize: '.8rem', fontWeight: 'bold' }} />
         </Tabs>
       </AppBar>
       <TabPanel value={v} index={0} dir={theme.direction}><Viagens id={idUser} /></TabPanel>

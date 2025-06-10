@@ -1,10 +1,9 @@
 // auth.ts - Versão corrigida
-import NextAuth, { AuthError, CredentialsSignin } from 'next-auth';
+import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import type { Provider } from 'next-auth/providers';
 import { compare } from 'bcryptjs';
 import prisma from '@/prisma';
-import { encoded } from './webToken';
 
 interface CustomUser {
   id: string;
@@ -73,6 +72,8 @@ async function validateCredentials(username: string, password: string) {
   };
 }
 
+let r = '';
+
 const providers: Provider[] = [
   Credentials({
     credentials: {
@@ -99,7 +100,7 @@ const providers: Provider[] = [
         }
 
         console.log(`Login bem-sucedido para usuário: ${user.username}`);
-
+        r = user.role
         // Return user in NextAuth User format
         return {
           id: user.id,
@@ -132,6 +133,7 @@ export const providerMap = providers.map((provider) => {
   return { id: provider.id, name: provider.name };
 });
 
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers,
   secret: process.env.AUTH_SECRET,
@@ -142,7 +144,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     authorized({ auth: session, request: { nextUrl } }) {
       const isLoggedIn = !!session?.user;
       const isPublicPage = nextUrl.pathname.startsWith('/auth') || nextUrl.pathname === '/';
-
       if (isPublicPage || isLoggedIn) {
         return true;
       }
@@ -164,37 +165,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.role = token.role as string;
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      let path = '/';
+
+      if (r && r === "ADMIN") path = '/dashboard';
+
+      return url.startsWith(baseUrl) ? url : baseUrl + path;
     }
   },
   events: {
     async signIn({ user }) {
       try {
-        const token = await encoded({
-          user: {
-            id: user.id,
-            username: (user as CustomUser).username,
-            role: (user as CustomUser).role,
-          }
-        });
-        
-        if (token) {
-          const novaData = Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 1);
-          await prisma.account.create({
-            data: {
-              provider: 'credentials',
-              type: 'credentials',
-              providerAccountId: user.id,
-              access_token: token,
-              expires_at: novaData,
-              token_type:'authorization',
-              user: {
-                connect: {
-                  id: user.id
-                }
-              }
-            }
-          });
-        }
         console.log(`Usuário logado com sucesso: ${(user as CustomUser).username}`);
       } catch (error) {
         console.error('Erro ao criar account no signIn:', error);
