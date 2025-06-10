@@ -2,7 +2,7 @@ import { User } from "next-auth";
 
 export interface CustomUser extends User {
   id: string;
-  role?: string;
+  role: string;
   email: string;
   username: string;
   name: string;

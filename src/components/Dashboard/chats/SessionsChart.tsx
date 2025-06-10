@@ -25,9 +25,8 @@ export default function SessionsChart() {
   const theme = useTheme();
   const [total,setTotal] = React.useState(0);
   const { data } = useSWR('/api/v2/dashboard/chart/lastMonth', fetcher);
-  if(!data) return;
-
-
+  
+  
   React.useMemo(() => {
     if (data) {
       const totalDataSum = data.reduce((total: number, item: { data: number[] }) => {
@@ -37,6 +36,7 @@ export default function SessionsChart() {
     }
   }, [data]);
   
+  if(!data) return;
 
   return (
     <Card variant="outlined" sx={{ width: '100%' }}>

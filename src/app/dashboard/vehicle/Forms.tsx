@@ -36,7 +36,7 @@ export default function VehicleModal({ isOpen, onClose, data, onSubmit }: UserMo
 
   const fixo = watch('fixo');
   React.useEffect(() => { reset(data || {}); }, [isOpen, data, reset]);
-  React.useEffect(() => { setValue('cidadeBase',!fixo?null:data?.cidadeBase); }, [fixo, reset]);
+  React.useEffect(() => { setValue('cidadeBase',!fixo?null:data?.cidadeBase); }, [setValue, fixo, reset, data?.cidadeBase]);
 
   const handleFormSubmit = async (data: vehicleFormData) => {
     try {
@@ -45,7 +45,6 @@ export default function VehicleModal({ isOpen, onClose, data, onSubmit }: UserMo
       const response = await method('/api/v2/dashboard/vehicles', { ...data }); // Chame o método apropriado
       await onSubmit(response.data); // Lidar com a resposta
       onClose(); // Feche o formulário
-
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || 'Erro ao salvar'; // Obtenha a mensagem de erro
       Swal.fire({ icon: "error", title: "Oops...", text: errorMessage });

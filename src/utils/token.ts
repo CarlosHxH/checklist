@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/prisma";
 
 // utils/token.ts
 export async function validateUserToken(token: string): Promise<boolean> {

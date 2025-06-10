@@ -134,7 +134,7 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ open, onClose, in
 
   // Get the current form based on the active tab
   const currentForm = tabValue === 0 ? startForm : endForm;
-  const { control, handleSubmit, watch, reset, formState: { errors } } = currentForm;
+  const { control, handleSubmit, watch, reset, setValue,formState: { errors } } = currentForm;
 
   // Watch for values that affect conditional fields
   const avariasCabine = watch('avariasCabine');
@@ -276,7 +276,7 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({ open, onClose, in
       return (
         <Grid item xs={12} md={6}>
           <Controller name={name} control={control} render={({ field }) => (
-            <ButtonLabel name={name} label={label} options={["BOM", "RUIM"]} control={control} />
+            <ButtonLabel name={name} label={label} options={["BOM", "RUIM"]} onChange={(value)=>setValue(name,value)} />
           )}/>
           <Controller name={descricao} control={control} render={({ field }) => (<TextField {...field} label="Qual Defeito?" multiline fullWidth rows={2} />)} />
         </Grid>

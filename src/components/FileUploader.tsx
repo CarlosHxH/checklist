@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useState } from "react";
 import { styled } from "@mui/system";
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Image from "next/image";
 
 // Styled components
@@ -61,7 +61,7 @@ const FileUploader = ({ label, name, value, error, helperText, onChange, disable
   };
 
   React.useEffect(()=>{
-    if (onChange) {
+    if (onChange && name ) {
       onChange({
         target: {
           name,
@@ -73,7 +73,7 @@ const FileUploader = ({ label, name, value, error, helperText, onChange, disable
         }
       } as ChangeEvent<HTMLInputElement>);
     }
-  },[base64String, fileName])
+  },[base64String, name, fileName, onChange])
 
   React.useMemo(()=>{
     if (value) {

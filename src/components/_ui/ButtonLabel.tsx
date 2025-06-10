@@ -1,18 +1,16 @@
 "use client";
 import React, { useState } from "react";
 import { ToggleButtonGroup, Box, Typography, ToggleButton, styled, InputLabel } from "@mui/material";
-import { useController, Control } from "react-hook-form";
 
 interface ButtonLabelProps {
   label: string;
   name: string;
   options: string[];
-  control?: Control<any>;
-  rules?: Record<string, any>;
   disabled?: boolean;
   value?: string;
   onChange?: (value: string) => void;
   error?: { message?: string } | string;
+  defaultValue?: string;
 }
 
 const StyledToggleButton = styled(ToggleButton)({
@@ -36,36 +34,43 @@ const StyledToggleButton = styled(ToggleButton)({
   },
 });
 
-export default function ButtonLabel({ label, name, options, control, rules, disabled, value: propValue, onChange: propOnChange, error: propError, ...props }: ButtonLabelProps) {
-  // Internal state for uncontrolled usage
-  const [internalValue, setInternalValue] = useState<string | null>(null);
+export default function ButtonLabel({ 
+  label, 
+  name, 
+  options, 
+  disabled, 
+  value: propValue, 
+  onChange: propOnChange, 
+  error: propError,
+  defaultValue,
+  ...props 
+}: ButtonLabelProps) {
+  // Estado interno para uso não controlado
+  const [internalValue, setInternalValue] = useState<string | null>(defaultValue || null);
 
-  // Use react-hook-form if control is provided
-  const hookFormData = control ? useController({ name, control, rules }) : null;
+  // Determina se o componente é controlado ou não
+  const isControlled = propValue !== undefined;
+  const value = isControlled ? propValue : internalValue;
 
-  // Determine which values to use based on whether we're using react-hook-form or direct props
-  const value = hookFormData ? hookFormData.field.value : propValue !== undefined ? propValue : internalValue;
-  const error = hookFormData ? hookFormData.fieldState.error : propError;
-
-  // Handle state change
+  // Manipula mudanças de estado
   const handleChange = (_: React.MouseEvent<HTMLElement>, newValue: string | null) => {
     if (newValue === null) return;
 
-    // Handle different update scenarios
-    if (hookFormData) {
-      hookFormData.field.onChange(newValue);
-    } else if (propOnChange) {
-      propOnChange(newValue);
+    if (isControlled) {
+      // Componente controlado - chama o onChange passado via props
+      propOnChange?.(newValue);
     } else {
+      // Componente não controlado - atualiza estado interno
       setInternalValue(newValue);
+      propOnChange?.(newValue); // Ainda chama onChange se fornecido
     }
   };
 
-  // Format error message correctly
-  const errorMessage = error
-    ? typeof error === 'string'
-      ? error
-      : error.message
+  // Formata mensagem de erro
+  const errorMessage = propError
+    ? typeof propError === 'string'
+      ? propError
+      : propError.message
     : null;
 
   return (
@@ -80,7 +85,7 @@ export default function ButtonLabel({ label, name, options, control, rules, disa
       >
         {options.map(option => (
           <StyledToggleButton
-            className={!!error ? "error" : ""}
+            className={!!propError ? "error" : ""}
             disabled={disabled}
             key={option}
             value={option}

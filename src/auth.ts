@@ -5,15 +5,6 @@ import type { Provider } from 'next-auth/providers';
 import { compare } from 'bcryptjs';
 import prisma from '@/prisma';
 
-interface CustomUser {
-  id: string;
-  role: string;
-  username: string;
-  email: string;
-  name: string;
-  image: string | null;
-}
-
 // Função auxiliar para buscar usuário
 async function findUserByUsername(username: string) {
   try {
@@ -153,8 +144,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.username = (user as CustomUser).username;
-        token.role = (user as CustomUser).role ?? "";
+        token.username = user.username;
+        token.role = user.role ?? "";
       }
       return token;
     },
@@ -177,7 +168,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   events: {
     async signIn({ user }) {
       try {
-        console.log(`Usuário logado com sucesso: ${(user as CustomUser).username}`);
+        console.log(`Usuário logado com sucesso: ${user.username}`);
       } catch (error) {
         console.error('Erro ao criar account no signIn:', error);
       }

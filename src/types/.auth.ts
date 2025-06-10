@@ -2,7 +2,7 @@ import { User } from "next-auth";
 
 export interface CustomUser extends User {
   id: string;
-  role?: string;
+  role: string;
   email: string;
   username: string;
   name: string;
@@ -20,9 +20,8 @@ export interface TokenPayload {
 declare module "next-auth" {
   interface Session {
     user: {
-      [x: string]: unknown;
       id: string;
-      role?: string;
+      role: string;
       username: string;
       email: string;
       name: string;

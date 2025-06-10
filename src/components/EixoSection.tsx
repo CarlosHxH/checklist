@@ -26,20 +26,19 @@ export interface EixoSectionProps {
 }
 
 export const EixoSection: React.FC<EixoSectionProps> = ({ eixoNumber, label, fieldName, selectedVehicle, control, register, watch, setValue }) => {
-    if (!selectedVehicle || Number(selectedVehicle.eixo) < Number(eixoNumber)) return null;
-
-    useEffect(() => {
-        setValue("eixo", String(eixoNumber));
-    }, [eixoNumber, setValue]);
-
+    
+    useEffect(() => { setValue("eixo", String(eixoNumber)) }, [eixoNumber, setValue]);
+    
     const currentValue = watch(fieldName);
     const field = `descricao${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}` as keyof InspectionFormData;
-
+    
     useEffect(() => {
         if (currentValue === "BOM") {
             setValue(field, "");
         }
     }, [currentValue, field, setValue]);
+    
+    if (!selectedVehicle || Number(selectedVehicle.eixo) < Number(eixoNumber)) return null;
 
     return (
         <Grid item xs={12} md={6}>

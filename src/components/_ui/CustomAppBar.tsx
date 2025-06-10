@@ -55,7 +55,7 @@ const CustomAppBar = () => {
               label={session?.user?.name}
               variant="outlined"
             />}
-            {session?.user?.role==="ADMIN"&&<ToolbarAdmin />}
+            {(session?.user as any)?.role==="ADMIN"&&<ToolbarAdmin />}
             <ThemeSwitcher />
             <ToolbarAccount />
           </Box>

@@ -1,6 +1,6 @@
 import NextAuth, { DefaultSession } from 'next-auth';
 
-interface CustomUser {
+export interface CustomUser {
   id: string;
   role: string;
   username: string;
