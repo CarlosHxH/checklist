@@ -57,3 +57,23 @@ export async function GET(
     return NextResponse.json({ error: "Error fetching data" }, { status: 500 });
   }
 }
+
+// DELETE pending transfer
+export async function DELETE(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    
+    const deletedTransfer = await prisma.vehicleKey.delete({ where: { id, status: "PENDING" }});
+    if (!deletedTransfer) throw new Error('Transferência pendente não encontrada!');
+    return NextResponse.json(deletedTransfer, { status: 200 });
+  } catch (error) {
+    console.error('Erro ao rejeitar a transferência:', error);
+    return NextResponse.json(
+      { error: 'Erro ao rejeitar a transferência' }, 
+      { status: 500 }
+    );
+  }
+}

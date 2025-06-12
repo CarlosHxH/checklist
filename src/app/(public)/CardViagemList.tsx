@@ -6,8 +6,8 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 import Link from 'next/link';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { InspectionData, InspectionDetail } from '@/app/types/inspectionType';
-import { formatDate } from '@/app/utils';
+import { InspectionData, InspectionDetail } from '@/types/inspectionType';
+import { formatDate } from '@/utils';
 
 interface CardViagemProps {
   inspection: InspectionData;

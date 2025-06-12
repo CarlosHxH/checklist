@@ -32,7 +32,7 @@ export const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1976d2', // override AppBar background color
+          backgroundColor: '#1976d2',
         },
       },
     },

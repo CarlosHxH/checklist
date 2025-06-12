@@ -11,6 +11,8 @@ import ThemeWrapper from '../ThemeWrapper';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { KeyOutlined } from '@mui/icons-material';
+import MobileFriendlyIcon from '@mui/icons-material/MobileFriendly';
+import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 
 const NAVIGATION: Navigation = [
   {
@@ -36,21 +38,14 @@ const NAVIGATION: Navigation = [
     title: 'Análises',
   },
   {
-    segment: 'dashboard/',
-    title: 'Relatório',
-    icon: <BarChartIcon />,
-    children: [
-      {
-        segment: 'viagens',
-        title: 'Viagens',
-        icon: <LocalShippingIcon />,
-      },
-      {
-        segment: 'inspecao',
-        title: 'Inspeções',
-        icon: <DescriptionIcon />,
-      },
-    ],
+    segment: 'dashboard/viagens',
+    title: 'Viagens',
+    icon: <LocalShippingIcon />,
+  },
+  {
+    segment: 'dashboard/inspecao',
+    title: 'Inspeções',
+    icon: <DescriptionIcon />,
   },
   {
     segment: 'dashboard/users',
@@ -58,9 +53,21 @@ const NAVIGATION: Navigation = [
     icon: <LayersIcon />,
   },
   {
+    segment: 'dashboard/vehicles',
+    title: 'Veiculos',
+    icon: <DirectionsCarFilledIcon />,
+  },
+  {
+    kind: 'divider',
+  },
+  {
+    kind: 'header',
+    title: 'Aplicativo',
+  },
+  {
     segment: '../',
     title: 'Checklist',
-    icon: <LayersIcon />,
+    icon: <MobileFriendlyIcon />,
   },
 ];
 

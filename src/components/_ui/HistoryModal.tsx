@@ -45,25 +45,26 @@ interface VehicleKey {
   status: "CONFIRMED" | "REJECTED" | "PENDING";
 }
 
-interface HistoryModalProps {
+export interface HistoryModalProps {
   open: boolean
   onClose: () => void
-  vehicleKeys: {
+  data: {
     vehicle: Vehicle
     keys: VehicleKey[]
-    latestKey: VehicleKey
-  } | null
+    latestKey: VehicleKey[]
+  }|any
 }
 
 const HistoryModal = ({ 
   open, 
   onClose, 
-  vehicleKeys 
+  data 
 }: HistoryModalProps) => {
-  if (!vehicleKeys) return null;
-
+  if (!data) return null;
   // Sort keys from most recent to oldest
-  const sortedKeys = [...vehicleKeys.keys].sort(
+  console.log({data});
+  
+  const sortedKeys = [...data.vehicleKeys].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
@@ -73,8 +74,8 @@ const HistoryModal = ({
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">
             Histórico do Veículo:
-            <Typography>
-              <strong> {vehicleKeys.vehicle.model} - {vehicleKeys.vehicle.plate}</strong>
+            <Typography color='primary' sx={{fontWeight: 600}}>
+              {data.title}
             </Typography>
           </Typography>
           <Close onClick={onClose} sx={{ cursor: 'pointer' }} />

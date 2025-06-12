@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, Typography, Collapse, IconButton, Grid, Chip, Box } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { styled } from '@mui/material/styles';
-import { VehicleInspection } from '@/app/types/VehicleInspection';
+import { VehicleInspection } from '@/types/VehicleInspection';
 
 // Expanda o ícone de expansão para girar quando expandido
 const ExpandMore = styled((props: { expanded: boolean } & React.ComponentProps<typeof IconButton>) => {

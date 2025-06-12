@@ -126,6 +126,7 @@ export const providerMap = providers.map((provider) => {
 
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   providers,
   secret: process.env.AUTH_SECRET,
   pages: {
@@ -196,16 +197,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   logger: {
     error(code, ...message) {
       // Filtrar logs desnecessários de CredentialsSignin
-      //if (code !== 'CREDENTIALS_SIGNIN_ERROR') {
-      //}
-      //console.error(`NextAuth Error [${code}]:`, ...message);
+      //if (code !== 'CREDENTIALS_SIGNIN_ERROR') {}
+      console.error(`NextAuth Error [${code}]:`, ...message);
     },
     warn(code, ...message) {
-      //console.warn(`NextAuth Warning [${code}]:`, ...message);
+      console.warn(`NextAuth Warning [${code}]:`, ...message);
     },
     debug(code, ...message) {
       // Comentar em produção
-      // console.debug(`NextAuth Debug [${code}]:`, ...message);
+      console.debug(`NextAuth Debug [${code}]:`, ...message);
     },
   },
 });

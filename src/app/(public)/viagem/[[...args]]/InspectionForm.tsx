@@ -54,16 +54,12 @@ export const EixoSection: React.FC<EixoSectionProps> = ({
   useEffect(() => {
     // Only execute the effect if the component should be rendered
     if (selectedVehicle && Number(selectedVehicle.eixo) >= Number(eixoNumber)) {
-      if (currentValue === "BOM") {
-        setValue(field, "");
-      }
+      if (currentValue === "BOM") setValue(field, "");
     }
   }, [currentValue, field, setValue, selectedVehicle, eixoNumber]);
 
   // Conditionally render the component
-  if (!selectedVehicle || Number(selectedVehicle.eixo) < Number(eixoNumber)) {
-    return null;
-  }
+  if (!selectedVehicle || Number(selectedVehicle.eixo) < Number(eixoNumber)) return;
 
   return (
     <Grid item xs={12} md={6}>
@@ -90,11 +86,11 @@ export const EixoSection: React.FC<EixoSectionProps> = ({
 };
 
 
-
 const InspectionForm: React.FC<{ type: "INICIO" | "FINAL"; id: string }> = ({ type, id }) => {
   const [submitting, setSubmitting] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = React.useState(false);
   const router = useRouter();
   const { data: session } = useSession();
   
