@@ -77,7 +77,7 @@ export default function InspectionsDashboard() {
       </Grid>
 
       <Grid item xs={6} md={3}>
-        <Card>
+        <Card style={{ height: 180 }}>
           <CardContent>
             <Typography variant="h5" gutterBottom>
               Total de Viagens
@@ -93,7 +93,7 @@ export default function InspectionsDashboard() {
       </Grid>
 
       <Grid item xs={6} md={3}>
-        <Card>
+        <Card style={{ height: 180 }}>
           <CardContent>
             <Typography variant="h5" gutterBottom>
               Total de Viagens
@@ -109,17 +109,17 @@ export default function InspectionsDashboard() {
       </Grid>
 
       <Grid item xs={12} md={6}>
-        <Card style={{height:'100%'}}>
+        <Card style={{ height: 180 }}>
           <CardContent>
             <Typography variant="h5" gutterBottom>
               Taxa de Finalização
             </Typography>
             <Typography variant="h3">
-              {data.statusSummary.unfinishedPercentage||0}%
+              {data.statusSummary.unfinishedPercentage || 0}%
             </Typography>
-            <Box sx={{mt:4}}>
+            <Box sx={{ mt: 2 }}>
               <Typography variant="subtitle1" color="textSecondary">
-                {data.statusSummary.unfinished||0} de {data.statusSummary.total||0} inspeções finalizadas
+                {data.statusSummary.unfinished || 0} de {data.statusSummary.total || 0} inspeções finalizadas
               </Typography>
             </Box>
           </CardContent>

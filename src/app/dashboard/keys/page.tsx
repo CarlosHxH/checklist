@@ -1,7 +1,7 @@
 // page.tsx
 'use client'
 import * as React from 'react';
-import { DataGrid, GridColDef, GridRowParams, GridActionsCellItem, GridDataSource } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowParams, GridActionsCellItem } from '@mui/x-data-grid';
 import Typography from '@mui/material/Typography';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/ultils';
@@ -12,42 +12,43 @@ import VehicleKeyTransferModal from './modal';
 import Swal from 'sweetalert2';
 import HistoryModal, { HistoryModalProps } from '@/components/_ui/HistoryModal';
 import CustomToolBar from '@/components/_ui/CustomToolBar';
-import { Alert, Box } from '@mui/material';
+import { Alert, IconButton } from '@mui/material';
 import { useSession } from 'next-auth/react';
 import axios from 'axios';
+import CloseIcon from '@mui/icons-material/Close';
 
 export default function GridToolbar() {
   const { data: session } = useSession();
-  const { data, isLoading, mutate } = useSWR('/api/v2/dashboard/keys', fetcher)
   const [historyModalOpen, setHistoryModalOpen] = React.useState(false)
   const [historyView, setHistoryhistoryView] = React.useState<HistoryModalProps | any>()
-  const [isMounted, setIsMounted] = React.useState(false);
-
+  const { data, isLoading, mutate } = useSWR('/api/v2/dashboard/keys', fetcher)
+  
   const [modalOpen, setModalOpen] = React.useState(false);
-  const [isProcessing, setIsProcessing] = React.useState(false);
-  const [mesage, setMessage] = React.useState<{text:string;status:'success'|'error'} | null>();
+  const [ isProcessing ] = React.useState(false);
+  const [mesage, setMessage] = React.useState<{text?:string;status:'success'|'error'|'',isOpen?: Boolean} | null>();
+  const [isMounted, setIsMounted] = React.useState(false);
   
   React.useEffect(() => {
     setIsMounted(true);
-    return () => setIsMounted(false);
+    return () => setIsMounted(false)
   }, []);
 
   if (!isMounted) return;
 
   const handleTransfer = async (formData: any) => {
-    setIsProcessing(true);
+
     try {
       if (formData.userId===session?.user.id) {
         const { data } = await axios.post(`/api/v2/dashboard/keys`, {...formData, newUser: session?.user.id})
       } else {
         const { data } = await axios.post(`/api/v2/dashboard/keys`, formData)
       }
-      setMessage({text:'Chave transferida com sucesso!',status:'success'});
-      mutate()
+      setMessage({text:'Chave transferida com sucesso!',status:'success', isOpen: true});
     } catch (error) {
-      setMessage({text:'Erro ao fazer transferida!',status:'error'});
+      setMessage({text:'Erro ao fazer transferida!',status:'error', isOpen: true});
     } finally {
-      setIsProcessing(false);
+      mutate()
+      setTimeout(() => {setMessage({text:'',status:'', isOpen: false})}, 3000);
     }
   };
 
@@ -64,11 +65,12 @@ export default function GridToolbar() {
         const userId = session?.user.id||''
         if (!userId) throw new Error('Erro ao Receber chave')
         const { data } = await axios.put(`/api/v2/dashboard/keys`, {id,userId})
-        setMessage({text:'Transferência recebida com sucesso!',status:'success'});
+        setMessage({text:'Transferência recebida com sucesso!',status:'success', isOpen: true});
       } catch (error) {
-        setMessage({text:'Erro ao confirmar transferência',status:'error'});
+        setMessage({text:'Erro ao confirmar transferência',status:'error', isOpen: true});
       } finally {
         mutate();
+        setTimeout(() => {setMessage({text:'',status:'', isOpen: false})}, 3000);
       }
     });
   }
@@ -77,11 +79,12 @@ export default function GridToolbar() {
     if (!id || !confirm("Deseja cancelar a transferência de chave?")) return
     try {
       const { data } = await axios.delete(`/api/v2/dashboard/keys/${id}`)
-      setMessage({text:'Transferência deletada',status:'success'});
+      setMessage({text:'Transferência deletada',status:'success', isOpen: true});
     } catch (error) {
-      setMessage({text:'Erro ao rejeitar transferência.',status:'error'});
+      setMessage({text:'Erro ao rejeitar transferência.',status:'error', isOpen: true});
     } finally {
       mutate();
+      setTimeout(() => {setMessage({text:'',status:'', isOpen: false})}, 3000);
     }
   }
 
@@ -140,7 +143,18 @@ export default function GridToolbar() {
   return (
     <PageContainer style={{ height: 400, width: '100%' }}>
 
-      {mesage && <Alert color={mesage.status}>{mesage.text}</Alert>}
+      {!!mesage?.status && <Alert color={mesage.status} action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setMessage({status: ''});
+              }}
+            >
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+          }>{mesage.text}</Alert>}
 
       <DataGrid
         columns={columns}

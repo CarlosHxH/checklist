@@ -3,11 +3,12 @@ import React from 'react';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/ultils';
 import Loading from '@/components/Loading';
-import { Box, Chip, IconButton, Paper, Tooltip, Typography } from '@mui/material';
+import { Box, Chip, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridToolbar } from '@mui/x-data-grid';
 import { useRouter } from 'next/navigation';
 import { Visibility } from '@mui/icons-material';
 import { PageContainer } from '@toolpad/core/PageContainer';
+import CustomToolBar from '@/components/_ui/CustomToolBar';
 
 interface Vehicle {
   plate: string;
@@ -33,7 +34,9 @@ interface Inspection {
 
 const InspectionDashboard: React.FC = () => {
   const router = useRouter();
-  const { data: inspections, error } = useSWR<Inspection[]>('/api/v2/dashboard/inspecao', fetcher);
+  const theme = useTheme();
+  const { data: inspections, error, isLoading } = useSWR<Inspection[]>('/api/v2/dashboard/inspecao', fetcher);
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const StatusChip: React.FC<{ value: string }> = ({ value }) => {
     const getChipProps = () => {
@@ -64,8 +67,7 @@ const InspectionDashboard: React.FC = () => {
       minWidth: 100,
       flex: 1,
       renderCell: (params: GridRenderCellParams) => (<Box>
-        <Typography variant='subtitle2'>{params.formattedValue.plate}</Typography>
-        <Typography variant='caption'>{params.formattedValue.model}</Typography>
+        <Typography variant='subtitle2'>{params.formattedValue.plate} - {params.formattedValue.model}</Typography>
       </Box>
       ),
     },
@@ -129,30 +131,38 @@ const InspectionDashboard: React.FC = () => {
 
   if (error) return <div>Erro ao carregar as inspeções</div>;
   if (!inspections) return <Loading />;
-
+  const xs = isMobile ? { year: false, eixo: false, model: false } : null
   return (
-      <PageContainer >
-        <DataGrid
-          rows={inspections}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 15 }
-            }
-          }}
-          slots={{ toolbar: GridToolbar }}
-          localeText={{
-            toolbarColumns: "",
-            toolbarFilters: "",
-            toolbarExport: "",
-            toolbarDensity: ""
-          }}
-          pageSizeOptions={[5, 10, 15, 25, 50, 75, 100]}
-          rowSelection={false}
-          getRowHeight={() => 'auto'}
-          rowHeight={48}
-        />
-      </PageContainer >
+    <PageContainer style={{ height: 400, width: '100%' }}>
+
+      <DataGrid
+        rows={inspections}
+        columns={columns}
+        loading={isLoading}
+        slots={{ toolbar: () => <CustomToolBar title={'INSPEÇÃO DE VIAGEM'} /> }}
+        showToolbar
+        autoPageSize
+        localeText={{
+          toolbarQuickFilterPlaceholder: 'Pesquisar...',
+        }}
+        slotProps={{
+          loadingOverlay: {
+            variant: 'skeleton',
+            noRowsVariant: 'skeleton',
+          },
+        }}
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 10 },
+          },
+          columns: {
+            columnVisibilityModel: { ...xs },
+          },
+        }}
+        pageSizeOptions={[10, 50, 100, { value: 1000, label: '1,000' }, { value: -1, label: 'All' }]}
+      />
+    </PageContainer>
+    
   );
 };
 

@@ -2,7 +2,6 @@
 import * as React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Create, DataSourceCache, Edit, List } from '@toolpad/core/Crud';
-import { Data, dataSource } from './actions';
 import { PageContainer } from '@toolpad/core/PageContainer';
 
 const cache = new DataSourceCache();
@@ -35,8 +34,31 @@ export default function CrudListDataGrid() {
 
   return (
     <PageContainer>
-      <List<Data>
-        dataSource={dataSource}
+      <List<any>
+        dataSource={{
+          getMany: async () => (
+            {
+              items: [], 
+              itemCount: [].length 
+            }
+          ),
+          fields: [
+            { field: 'id', headerName: 'ID' },
+            {
+              field: 'vehicle',
+              headerName: 'VEICULO',
+              flex: 1,
+              type: 'singleSelect'
+            },
+            { field: 'username', headerName: 'USUÁRIO', width: 200 },
+            { 
+              field: 'status', 
+              headerName: 'STATUS', 
+              type: 'singleSelect', 
+              valueOptions: ['PENDENTE', 'CONFIRMADO'], 
+              width: 150 
+            },
+          ]}}
         dataSourceCache={cache}
         onRowClick={handleRowClick}
         onCreateClick={handleCreateClick}

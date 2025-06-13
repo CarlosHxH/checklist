@@ -1,11 +1,7 @@
 "use client"
 import React from 'react';
-import {
-  DataGrid, GridColDef, GridToolbar,
-  GridRowParams, GridToolbarQuickFilter, GridToolbarContainer,
-  GridToolbarColumnsButton, GridToolbarFilterButton, GridToolbarExport
-} from '@mui/x-data-grid';
-import { Box, Button,  Stack, useMediaQuery, useTheme } from '@mui/material';
+import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
+import { useMediaQuery, useTheme } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import useSWR from 'swr';
@@ -13,14 +9,23 @@ import { fetcher } from '@/lib/ultils';
 import UserModal, { UserFormData } from './Forms';
 import axios from 'axios';
 import VerticalActions from '@/components/_ui/VerticalActions';
+import CustomToolBar from '@/components/_ui/CustomToolBar';
+import { PageContainer } from '@toolpad/core/PageContainer';
 
 const UserDataGrid: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const { data: users, isLoading, mutate } = useSWR<UserFormData[]>('/api/v2/dashboard/users', fetcher);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedUser, setSelectedUser] = React.useState(null);
-  const [paginationModel, setPaginationModel] = React.useState({ pageSize: 10, page: 0 });
+  const [isMounted, setIsMounted] = React.useState(false);
+  const { data: users, isLoading, mutate } = useSWR<UserFormData[]>('/api/v2/dashboard/users', fetcher);
+  
+  React.useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false)
+  }, []);
+
+  if (!isMounted) return;
 
   const handleDelete = (id: string) => {
     if (users) {
@@ -63,38 +68,25 @@ const UserDataGrid: React.FC = () => {
     }
   ];
 
-  function CustomToolbar() {
-    return (
-      <GridToolbarContainer>
-        <GridToolbarColumnsButton />
-        <GridToolbarFilterButton />
-        <GridToolbarExport printOptions={{disableToolbarButton:true}} csvOptions={{ allColumns: true }} slotProps={{ tooltip: { title: '', sx: { width: 100 } }, button: { sx: { width: 50 } } }} />
-        <Box sx={{ flexGrow: 1 }} />
-        <Stack direction="row" spacing={2} alignItems={'center'}>
-          <GridToolbarQuickFilter variant="outlined" size="small" />
-          <Button onClick={() => setIsModalOpen(true)} variant="contained" size='large' color="primary">Novo</Button>
-        </Stack>
-      </GridToolbarContainer>
-    );
-  }
-
   const xs = isMobile ? { year: false, eixo: false, model: false } : null
   return (
-    <Box sx={{ height: 'auto', width: '100%' }}>
+    <PageContainer style={{ height: 400, width: '100%' }}>
+
       <DataGrid
-        rows={users}
         columns={columns}
+        rows={users}
         loading={isLoading}
-        pagination
-        paginationModel={paginationModel}
-        onPaginationModelChange={setPaginationModel}
-        disableRowSelectionOnClick
-        slots={{ toolbar: CustomToolbar || GridToolbar }}
+        slots={{ toolbar: () => <CustomToolBar title={'Usuarios'} onClickCreate={() => setIsModalOpen(true)} /> }}
+        showToolbar
+        autoPageSize
         localeText={{
-          toolbarColumns: "",
-          toolbarFilters: "",
-          toolbarExport: "",
-          toolbarDensity: "",
+          toolbarQuickFilterPlaceholder: 'Pesquisar...',
+        }}
+        slotProps={{
+          loadingOverlay: {
+            variant: 'skeleton',
+            noRowsVariant: 'skeleton',
+          },
         }}
         initialState={{
           pagination: {
@@ -104,13 +96,7 @@ const UserDataGrid: React.FC = () => {
             columnVisibilityModel: { ...xs },
           },
         }}
-        density="standard"
-        slotProps={{
-          toolbar: {
-            showQuickFilter: true,
-            quickFilterProps: { debounceMs: 500 },
-          },
-        }}
+        pageSizeOptions={[10, 100, { value: 1000, label: '1,000' }, { value: -1, label: 'All' }]}
         sx={{
           '& .status-active': { color: 'green', fontWeight: 'bold' },
           '& .status-inactive': { color: 'red', fontWeight: 'bold' }
@@ -127,7 +113,7 @@ const UserDataGrid: React.FC = () => {
         onSubmit={async () => { await mutate() }}
       />
 
-    </Box>
+    </PageContainer>
   );
 };
 

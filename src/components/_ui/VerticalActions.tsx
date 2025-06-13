@@ -11,7 +11,7 @@ export default function VerticalActions({ isMobile, params, handleEdit, handleVi
   const Filds = [
     handleEdit && <GridActionsCellItem key={1} icon={<EditIcon />} label="Edit" onClick={() => handleEdit(params.id as string)} />,
     handleView && <GridActionsCellItem key={2} icon={<ViewIcon />} label="View" onClick={() => handleView(params.id as string)} />,
-    handleDelete && <GridActionsCellItem key={3} icon={<DeleteIcon />} label="Delete" onClick={() => handleDelete(params.id as string)} color="error" />
+    handleDelete && <GridActionsCellItem key={3} icon={<DeleteIcon color="error"/>} label="Delete" onClick={() => handleDelete(params.id as string)}/>
   ]
   if (!isMobile) return (<>{Filds}</>)
   return (

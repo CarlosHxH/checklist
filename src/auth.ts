@@ -78,18 +78,14 @@ const providers: Provider[] = [
           console.log('Credenciais não fornecidas');
           return null;
         }
-
         const { username, password } = credentials as { username: string; password: string };
-
         // Validate credentials and get user
         const user = await validateCredentials(username, password);
-
         if (!user) {
           // Log sem detalhes sensíveis
           console.log('Falha na autenticação');
           return null;
         }
-
         console.log(`Login bem-sucedido para usuário: ${user.username}`);
         r = user.role
         // Return user in NextAuth User format
@@ -129,17 +125,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   providers,
   secret: process.env.AUTH_SECRET,
-  pages: {
-    signIn: '/auth/signin',
-  },
+  pages: { signIn: '/auth/signin' },
   callbacks: {
     authorized({ auth: session, request: { nextUrl } }) {
       const isLoggedIn = !!session?.user;
       const isPublicPage = nextUrl.pathname.startsWith('/auth') || nextUrl.pathname === '/';
-      if (isPublicPage || isLoggedIn) {
-        return true;
-      }
-
+      if (isPublicPage || isLoggedIn) return true;
       return false;
     },
     async jwt({ token, user }) {
@@ -160,9 +151,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async redirect({ url, baseUrl }) {
       let path = '/';
-
       if (r && r === "ADMIN") path = '/dashboard';
-
       return url.startsWith(baseUrl) ? url : baseUrl + path;
     }
   },

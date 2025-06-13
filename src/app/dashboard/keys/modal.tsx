@@ -181,7 +181,6 @@ const VehicleKeyTransferModal: React.FC<VehicleKeyTransferModalProps> = ({
     setConfirmDialogOpen(false);
     try {
       const submitData: FormData = { ...formData };
-      
       // Adicionar parentId da chave atual se existir
       const group = groupedVehicleKeys[formData.vehicleId];
       if (group && group.vehicleKeys && group.vehicleKeys.length > 0) {
