@@ -4,10 +4,7 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-
 import StatCard, { StatCardProps } from "@/components/Dashboard/chats/StatCard";
-import CustomTreeView from "@/components/Dashboard/chats/CustomTreeView";
-import ChartByVehicle from "@/components/Dashboard/chats/ChartByVehicle";
 import Loading from "@/components/Loading";
 import useSWR from "swr";
 import { fetcher } from "@/lib/ultils";
@@ -77,57 +74,13 @@ export default function DashboardContent() {
                   period="12months"
                 />
               </Grid>
-
-              {false && <Grid size={{ xs: 12, sm: 6, lg: 6 }}><ChartByVehicle /></Grid>}
             </Grid>
-            
-            <Grid size={{ xs: 12, sm: 6, lg: 6 }}><ChartByUsers dataset={data.byUsers}/></Grid>
-
-            {false && (
-              <>
-                <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-                  Detalhes
-                </Typography>
-                <Grid container spacing={2} columns={12}>
-                  <Grid size={{ xs: 12, lg: 6 }}>
-                    <Stack gap={2} direction={{ xs: "column", sm: "row" }}>
-                      <CustomTreeView />
-                    </Stack>
-                  </Grid>
-                </Grid>
-              </>
-            )}
+            <Grid size={{ xs: 12, sm: 6, lg: 6 }}>
+              <ChartByUsers dataset={data.byUsers}/>
+            </Grid>
           </Box>
         </Stack>
       </Box>
     </Box>
   );
 }
-
-
-/*
-const exportToCSV = () => {
-  if (!data) return;
-  const csvRows = [];
-  // Adiciona o cabeçalho
-  csvRows.push(['Mês', 'Valor']);
-  // Adiciona os dados
-  data.forEach((item: any, index: number) => {
-    const month = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][index];
-    item.data.forEach((value: any) => {
-      csvRows.push([month, value]);
-    });
-  });
-  // Cria um blob e inicia o download
-  const csvString = csvRows.map(row => row.join(',')).join('\n');
-  const blob = new Blob([csvString], { type: 'text/csv' });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.setAttribute('hidden', 'true');
-  a.setAttribute('href', url);
-  a.setAttribute('download', 'dados_inspecoes.csv');
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-};
-*/
